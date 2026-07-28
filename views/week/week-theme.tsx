@@ -1,3 +1,4 @@
+import Prose from '@/components/markdown'
 import type { BriefTheme } from '@/lib/types/brief.types'
 
 export interface WeekThemeProps {
@@ -6,20 +7,27 @@ export interface WeekThemeProps {
 
 export default function WeekTheme({ theme }: WeekThemeProps) {
     return (
-        <section className="border-line mb-6 border-l-2 py-0.5 pl-[18px]">
-            <h3 className="mb-2.5 text-[17px] leading-tight tracking-[-0.01em]">
-                {theme.title}
-            </h3>
-            <p className="text-muted mb-2.5 text-[15px]">{theme.summary}</p>
-            {theme.prs.length > 0 && (
-                <ul className="list-disc pl-[18px] text-sm">
-                    {theme.prs.map(pull => (
-                        <li key={pull.url} className="mb-1">
-                            <a href={pull.url}>#{pull.number}</a> {pull.title}
-                        </li>
-                    ))}
-                </ul>
-            )}
+        <section className="panel mb-3 px-6 py-5">
+            <div className="mb-3 flex items-baseline gap-3">
+                <h3 className="text-[15px] font-medium tracking-[-0.01em]">
+                    {theme.title}
+                </h3>
+                <span className="text-muted ml-auto font-mono text-[12px]">
+                    {theme.prs.length} PR
+                </span>
+            </div>
+
+            <Prose muted content={theme.summary} />
+
+            <ul className="mt-4 flex flex-wrap gap-x-4 gap-y-1.5 border-none p-0">
+                {theme.prs.map(pull => (
+                    <li
+                        key={pull.url}
+                        className="text-muted list-none font-mono text-[12px]">
+                        <a href={pull.url}>#{pull.number}</a>
+                    </li>
+                ))}
+            </ul>
         </section>
     )
 }

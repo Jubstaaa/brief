@@ -1,4 +1,8 @@
-import { MAX_FILES_PER_PR, PR_BODY_LIMIT } from '../constants/noise.constants'
+import {
+    MAX_FILES_PER_PR,
+    PATCH_LIMIT,
+    PR_BODY_LIMIT,
+} from '../constants/noise.constants'
 import type { PullDetail, RepoConfig } from '../types/brief.types'
 
 import { octokit } from './client'
@@ -23,6 +27,7 @@ export async function fetchPullDetail(
         files: files.map(file => ({
             additions: file.additions,
             deletions: file.deletions,
+            patch: (file.patch ?? '').slice(0, PATCH_LIMIT),
             path: file.filename,
         })),
         label: config.label,

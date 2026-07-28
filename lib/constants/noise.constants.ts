@@ -14,3 +14,7 @@ export const NOISE_PATTERNS: RegExp[] = [
 export const PR_BODY_LIMIT = 1400
 
 export const MAX_FILES_PER_PR = 12
+
+export const PATCH_LIMIT = 450
+
+export const MAX_PATCHED_FILES = 2

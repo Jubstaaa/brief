@@ -32,11 +32,14 @@
         "openai": "^7.0.0",
         "react": "^19.2.8",
         "react-dom": "^19.2.8",
+        "react-markdown": "^10.1.0",
+        "rehype-highlight": "^7.0.2",
+        "remark-gfm": "^4.0.1",
         "zod": "^4.4.3"
     },
     "scripts": {
         "dev": "next dev",
-        "build": "next build",
+        "build": "rm -rf .next/cache/fetch-cache && next build",
         "start": "next start",
         "generate": "bun run scripts/generate.ts",
         "test": "bun test",

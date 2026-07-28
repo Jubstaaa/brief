@@ -12,7 +12,7 @@ export const OUTPUT_LANGUAGE = process.env.BRIEF_LANGUAGE ?? 'Turkish'
 
 export const TRIAGE_MAX_TOKENS = 8_000
 
-export const DRAFT_MAX_TOKENS = 10_000
+export const DRAFT_MAX_TOKENS = 12_000
 
 export const HIGHLIGHT_TARGET = 9
 
@@ -27,3 +27,5 @@ export const REQUEST_TIMEOUT_MS = 300_000
 export const TRIAGE_REASONING_EFFORT: ReasoningEffort = 'low'
 
 export const DRAFT_REASONING_EFFORT: ReasoningEffort = 'medium'
+
+export const MAX_CODE_BLOCKS = 3

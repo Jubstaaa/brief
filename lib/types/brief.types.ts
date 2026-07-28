@@ -34,6 +34,7 @@ export interface Release {
 export interface PullFile {
     additions: number
     deletions: number
+    patch: string
     path: string
 }
 
@@ -47,7 +48,13 @@ export interface PullDetail {
     url: string
 }
 
+export interface BriefCode {
+    lang: string
+    snippet: string
+}
+
 export interface BriefHighlight {
+    code?: BriefCode | null
     pr: number
     repo: string
     title: string

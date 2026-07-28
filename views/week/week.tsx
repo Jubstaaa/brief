@@ -39,10 +39,11 @@ export default function WeekView({ brief }: WeekViewProps) {
                     {brief.highlights.length > 0 && (
                         <h2 className="section-heading">Öne çıkanlar</h2>
                     )}
-                    {brief.highlights.map(highlight => (
+                    {brief.highlights.map((highlight, index) => (
                         <WeekHighlight
                             key={highlight.url}
                             highlight={highlight}
+                            ordinal={index + 1}
                         />
                     ))}
 

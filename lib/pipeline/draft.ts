@@ -4,6 +4,7 @@ import {
     DRAFT_MAX_TOKENS,
     DRAFT_MODEL,
     DRAFT_REASONING_EFFORT,
+    MAX_CODE_BLOCKS,
     MIN_THEME_PULLS,
 } from '../constants/inference.constants'
 import { complete } from '../inference/client'
@@ -53,6 +54,7 @@ export async function draft(
             if (!detail) return undefined
 
             return {
+                code: item.code ?? null,
                 pr: item.pr,
                 repo: detail.label,
                 title: detail.title,
@@ -62,6 +64,13 @@ export async function draft(
             }
         })
     )
+
+    let codeBlocks = 0
+    for (const highlight of highlights) {
+        if (!highlight.code) continue
+        codeBlocks += 1
+        if (codeBlocks > MAX_CODE_BLOCKS) highlight.code = null
+    }
 
     const themes: BriefTheme[] = result.themes
         .map(theme => ({

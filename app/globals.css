@@ -74,3 +74,110 @@
 @utility callout {
     @apply border-line bg-panel text-muted mt-8 rounded-[10px] border border-dashed p-7 text-center;
 }
+
+@utility prose-brief {
+    & p {
+        @apply mb-4 text-[17px] leading-[1.65] last:mb-0;
+    }
+
+    & strong {
+        @apply text-ink font-semibold;
+    }
+
+    & code {
+        @apply bg-chip border-line rounded border px-1.5 py-0.5 font-mono text-[0.86em];
+    }
+
+    & pre {
+        @apply bg-panel border-line my-5 overflow-x-auto rounded-lg border p-4 text-[13.5px] leading-relaxed;
+    }
+
+    & pre code {
+        @apply border-0 bg-transparent p-0 text-[inherit];
+    }
+
+    & ul,
+    & ol {
+        @apply mb-4 pl-5 text-[16px] leading-relaxed;
+    }
+
+    & ul {
+        @apply list-disc;
+    }
+
+    & ol {
+        @apply list-decimal;
+    }
+
+    & a {
+        @apply underline decoration-1 underline-offset-2;
+    }
+}
+
+@utility prose-brief-muted {
+    & p {
+        @apply text-muted text-[15.5px];
+    }
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-doctag {
+    color: var(--accent);
+}
+
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-attribute {
+    color: color-mix(in oklab, var(--accent) 55%, var(--ink));
+}
+
+.hljs-comment,
+.hljs-quote,
+.hljs-deletion,
+.hljs-meta {
+    color: var(--muted);
+    font-style: italic;
+}
+
+.hljs-title,
+.hljs-section,
+.hljs-name,
+.hljs-attr,
+.hljs-variable,
+.hljs-template-variable,
+.hljs-type,
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-built_in {
+    color: var(--ink);
+}
+
+.hljs-emphasis {
+    font-style: italic;
+}
+
+.hljs-strong {
+    font-weight: 600;
+}
+
+.hljs-addition,
+.language-diff .hljs-addition {
+    color: color-mix(in oklab, var(--accent) 45%, var(--ink));
+    background: color-mix(in oklab, var(--accent) 8%, transparent);
+    display: inline-block;
+    width: 100%;
+}
+
+.hljs-deletion,
+.language-diff .hljs-deletion {
+    color: var(--muted);
+    background: color-mix(in oklab, var(--muted) 8%, transparent);
+    display: inline-block;
+    width: 100%;
+    text-decoration: line-through;
+    text-decoration-color: color-mix(in oklab, var(--muted) 40%, transparent);
+}
