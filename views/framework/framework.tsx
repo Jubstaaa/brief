@@ -1,18 +1,24 @@
 import Link from 'next/link'
 
-import type { ArchiveEntry } from '@/lib/types/brief.types'
+import type { ArchiveEntry, RepoConfig } from '@/lib/types/brief.types'
 import { formatRange } from '@/lib/utils/window'
 
-export interface ArchiveViewProps {
+export interface FrameworkViewProps {
+    config: RepoConfig
     entries: ArchiveEntry[]
 }
 
-export default function ArchiveView({ entries }: ArchiveViewProps) {
+export default function FrameworkView({ config, entries }: FrameworkViewProps) {
     return (
         <>
-            <h1 className="page-title">brief</h1>
+            <Link
+                className="text-muted mb-7 inline-block text-[13px] no-underline"
+                href="/">
+                ← tüm kategoriler
+            </Link>
+            <h1 className="page-title">{config.title}</h1>
             <p className="page-subtitle">
-                React ve Next.js&rsquo;te hafta hafta ne değişti.
+                {config.title}&rsquo;de hafta hafta ne değişti.
             </p>
 
             {entries.length === 0 ? (
@@ -27,13 +33,15 @@ export default function ArchiveView({ entries }: ArchiveViewProps) {
                                 className="border-line border-b">
                                 <Link
                                     className="text-ink hover:text-accent flex flex-col items-baseline gap-1 px-0.5 py-4 no-underline sm:flex-row sm:justify-between sm:gap-4"
-                                    href={`/w/${entry.week}`}>
+                                    href={`/${config.slug}/${entry.week}`}>
                                     <span>
                                         {formatRange(entry.since, entry.until)}
                                     </span>
                                     <small className="text-muted text-[13px] whitespace-nowrap">
-                                        {entry.itemCount} madde · {entry.total}{' '}
-                                        commit
+                                        {entry.frameworks.find(
+                                            item => item.slug === config.slug
+                                        )?.itemCount ?? 0}{' '}
+                                        madde
                                     </small>
                                 </Link>
                             </li>

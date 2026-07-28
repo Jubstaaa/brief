@@ -24,7 +24,6 @@ export default function WeekItem({ item, ordinal }: WeekItemProps) {
                 <span className="chip py-0.5 font-sans">
                     {LABELS[item.kind]}
                 </span>
-                <span className="text-muted ml-auto">{item.repo}</span>
             </div>
 
             <h3 className="mb-5 text-[23px] leading-[1.25] font-medium tracking-[-0.02em] sm:text-[28px]">

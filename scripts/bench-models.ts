@@ -20,6 +20,7 @@ interface Candidate {
 
 interface Sample {
     detail: PullDetail
+    framework: string
     kind: string
     reason: string
 }
@@ -101,7 +102,8 @@ async function callModel(
                 {
                     content: draftUser(
                         { kind: sample.kind, reason: sample.reason },
-                        sample.detail
+                        sample.detail,
+                        sample.framework
                     ),
                     role: 'user',
                 },
@@ -188,6 +190,7 @@ new Command()
 
             samples.push({
                 detail: await fetchPullDetail(config, entry.pr),
+                framework: config.title,
                 kind: entry.kind,
                 reason: entry.reason,
             })

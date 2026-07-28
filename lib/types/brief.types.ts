@@ -2,8 +2,11 @@ import type { BriefKind } from '../schemas/triage.schema'
 
 export interface RepoConfig {
     label: string
+    noise?: RegExp[]
     owner: string
     repo: string
+    slug: string
+    title: string
 }
 
 export interface BriefWindow {
@@ -98,7 +101,13 @@ export interface Brief {
     week: string
 }
 
+export interface ArchiveFramework {
+    itemCount: number
+    slug: string
+}
+
 export interface ArchiveEntry {
+    frameworks: ArchiveFramework[]
     itemCount: number
     since: string
     total: number

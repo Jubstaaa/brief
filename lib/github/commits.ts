@@ -38,7 +38,7 @@ export async function fetchCommits(
         }
     })
 
-    const { dropped, kept } = filterCommits(all)
+    const { dropped, kept } = filterCommits(all, config.noise)
 
     return { dropped, kept, label: config.label, total: all.length }
 }

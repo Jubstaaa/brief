@@ -5,7 +5,7 @@ import {
     INFERENCE_BASE_URL,
     TRIAGE_MAX_TOKENS,
 } from '../lib/constants/inference.constants'
-import { REPOS } from '../lib/constants/repos.constants'
+import { findRepo, REPOS } from '../lib/constants/repos.constants'
 import { fetchCommits } from '../lib/github/commits'
 import { extractJson } from '../lib/inference/client'
 import {
@@ -53,7 +53,13 @@ for (const candidate of CANDIDATES) {
                 max_tokens: TRIAGE_MAX_TOKENS,
                 messages: [
                     { content: TRIAGE_SYSTEM, role: 'system' },
-                    { content: triageUser(repo), role: 'user' },
+                    {
+                        content: triageUser(
+                            repo,
+                            findRepo(repo.label)?.title ?? repo.label
+                        ),
+                        role: 'user',
+                    },
                 ],
                 model: candidate.model,
                 ...(candidate.reasoningEffort

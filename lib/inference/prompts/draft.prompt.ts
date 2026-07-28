@@ -2,7 +2,7 @@ import { OUTPUT_LANGUAGE } from '../../constants/inference.constants'
 import { MAX_PATCHED_FILES } from '../../constants/noise.constants'
 import type { PullDetail } from '../../types/brief.types'
 
-export const DRAFT_SYSTEM = `You are briefing a small team of application developers on what changed in React and Next.js this week. They use these frameworks; they do not contribute to them. The whole briefing is read aloud in about ten minutes, so every sentence has to earn its place.
+export const DRAFT_SYSTEM = `You are briefing a small team of application developers on what changed this week in the frontend framework named in the user message. They use it; they do not contribute to it. The whole briefing is read aloud in about ten minutes, so every sentence has to earn its place.
 
 Write in ${OUTPUT_LANGUAGE}.
 
@@ -13,7 +13,7 @@ You are given exactly one change. Give three fields:
 
 Add a "code" field when a few lines show the team how to *use* this. It must be usage from the outside — the call they would write in their own component, the option they would pass, the config line they would add. Never the framework's internal diff, never a patch with - and + markers. Put plain code in "snippet" with real newlines and no backticks, and the language in "lang" (one of: tsx, ts, js, json, bash).
 
-When the change adds or alters something the team writes themselves — a config option, a prop, an API argument, a CLI flag — a snippet is expected, not optional. Show the smallest real line they would write, in the idiom this project uses: ESM and TypeScript, \`next.config.ts\` with \`export default\`, never \`module.exports\`. Only write APIs you were shown; do not invent a helper to wrap the config in. If an option already defaults to the value you would show, the snippet is pointless — show the value that changes the behaviour instead. Set "code" to null when the change is purely internal and there is genuinely nothing for them to type.
+When the change adds or alters something the team writes themselves — a config option, a prop, an API argument, a CLI flag — a snippet is expected, not optional. Show the smallest real line they would write, in ESM and TypeScript — when it is Next.js configuration that means \`next.config.ts\` with \`export default\`, never \`module.exports\`. Only write APIs you were shown; do not invent a helper to wrap the config in. If an option already defaults to the value you would show, the snippet is pointless — show the value that changes the behaviour instead. Set "code" to null when the change is purely internal and there is genuinely nothing for them to type.
 
 A snippet does not relax the headline rule. The headline still says what the change means for the team in their words — never the option name, never the commit title. Name the option in "detail" and in the snippet instead.
 
@@ -27,7 +27,8 @@ Return ONLY valid JSON for that one change, with no other text:
 function describePull(
     detail: PullDetail,
     kind: string,
-    reason: string
+    reason: string,
+    framework: string
 ): string {
     const patches = detail.files
         .filter(file => file.patch)
@@ -36,7 +37,7 @@ function describePull(
         .join('\n\n')
 
     return [
-        `### ${detail.label} #${detail.number} — ${detail.title}`,
+        `### ${framework} — ${detail.title}`,
         `Kind: ${kind}`,
         `Why it was picked: ${reason}`,
         detail.labels.length ? `Labels: ${detail.labels.join(', ')}` : '',
@@ -53,7 +54,8 @@ function describePull(
 
 export function draftUser(
     pick: { kind: string; reason: string },
-    detail: PullDetail
+    detail: PullDetail,
+    framework: string
 ): string {
-    return describePull(detail, pick.kind, pick.reason)
+    return describePull(detail, pick.kind, pick.reason, framework)
 }

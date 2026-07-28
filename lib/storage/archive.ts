@@ -19,7 +19,12 @@ async function fetchJson<T>(key: string): Promise<T | null> {
 }
 
 export async function readArchive(): Promise<ArchiveEntry[]> {
-    return (await fetchJson<ArchiveEntry[]>(INDEX_KEY)) ?? []
+    const entries = (await fetchJson<ArchiveEntry[]>(INDEX_KEY)) ?? []
+
+    return entries.map(entry => ({
+        ...entry,
+        frameworks: entry.frameworks ?? [],
+    }))
 }
 
 export async function readBrief(week: string): Promise<Brief | null> {

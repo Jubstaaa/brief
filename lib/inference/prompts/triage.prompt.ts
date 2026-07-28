@@ -1,7 +1,7 @@
 import { HIGHLIGHTS_PER_REPO } from '../../constants/inference.constants'
 import type { RepoCommits } from '../../types/brief.types'
 
-export const TRIAGE_SYSTEM = `You follow React and Next.js on behalf of a small team that *uses* them to ship applications. You are not a contributor to either project.
+export const TRIAGE_SYSTEM = `You follow a frontend framework on behalf of a small team that *uses* it to ship applications. You are not a contributor to the project. The user message names which framework this week's commits come from.
 
 You will be given one week of commit titles from a single repository. Pick only the changes that a working application developer would care about, at most ${HIGHLIGHTS_PER_REPO}. Fewer is better — most weeks contain only two or three.
 
@@ -19,8 +19,8 @@ Return ONLY valid JSON, with no other text:
 
 The pr field is the (#12345) number from the commit title. kind is one of: feature, fix, security, performance, breaking. Keep your reasoning brief.`
 
-export function triageUser(repo: RepoCommits): string {
+export function triageUser(repo: RepoCommits, framework: string): string {
     const titles = repo.kept.map(commit => commit.title).join('\n')
 
-    return `Repository: ${repo.label}\nCommits this week (${repo.kept.length}):\n\n${titles}`
+    return `Framework: ${framework}\nRepository: ${repo.label}\nCommits this week (${repo.kept.length}):\n\n${titles}`
 }

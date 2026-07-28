@@ -2,11 +2,32 @@ import type { ReactNode } from 'react'
 
 import type { Metadata } from 'next'
 
+import {
+    SITE_DESCRIPTION,
+    SITE_LOCALE,
+    SITE_NAME,
+    SITE_URL,
+} from '@/lib/constants/site.constants'
+
 import './globals.css'
 
 export const metadata: Metadata = {
-    description: 'React ve Next.js\u2019te hafta hafta ne değişti.',
-    title: 'brief',
+    description: SITE_DESCRIPTION,
+    metadataBase: new URL(SITE_URL),
+    openGraph: {
+        description: SITE_DESCRIPTION,
+        locale: SITE_LOCALE,
+        siteName: SITE_NAME,
+        title: SITE_NAME,
+        type: 'website',
+        url: '/',
+    },
+    title: SITE_NAME,
+    twitter: {
+        card: 'summary_large_image',
+        description: SITE_DESCRIPTION,
+        title: SITE_NAME,
+    },
 }
 
 export interface RootLayoutProps {

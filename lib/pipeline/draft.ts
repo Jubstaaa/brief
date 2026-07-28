@@ -6,6 +6,7 @@ import {
     DRAFT_MODEL,
     MAX_CODE_BLOCKS,
 } from '../constants/inference.constants'
+import { findRepo } from '../constants/repos.constants'
 import { complete } from '../inference/client'
 import { DRAFT_SYSTEM, draftUser } from '../inference/prompts/draft.prompt'
 import { draftItemSchema } from '../schemas/draft.schema'
@@ -16,13 +17,15 @@ async function draftOne(
     pick: TriagePick,
     detail: PullDetail
 ): Promise<BriefItem | undefined> {
+    const framework = findRepo(pick.repo)?.title ?? pick.repo
+
     try {
         const written = await complete({
             maxTokens: DRAFT_MAX_TOKENS,
             model: DRAFT_MODEL,
             schema: draftItemSchema,
             system: DRAFT_SYSTEM,
-            user: draftUser(pick, detail),
+            user: draftUser(pick, detail, framework),
         })
 
         return {
@@ -37,6 +40,19 @@ async function draftOne(
     } catch (error) {
         consola.warn(`drafting ${pick.repo}#${pick.pr} failed, skipping`, error)
         return undefined
+    }
+}
+
+function capCodeBlocks(items: BriefItem[]): void {
+    const used = new Map<string, number>()
+
+    for (const item of items) {
+        if (!item.code) continue
+
+        const count = (used.get(item.repo) ?? 0) + 1
+        used.set(item.repo, count)
+
+        if (count > MAX_CODE_BLOCKS) item.code = null
     }
 }
 
@@ -57,12 +73,7 @@ export async function draft(
         )
     )
 
-    let codeBlocks = 0
-    for (const item of items) {
-        if (!item.code) continue
-        codeBlocks += 1
-        if (codeBlocks > MAX_CODE_BLOCKS) item.code = null
-    }
+    capCodeBlocks(items)
 
     return items
 }

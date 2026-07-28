@@ -1,11 +1,14 @@
 import { NOISE_PATTERNS } from '../constants/noise.constants'
 import type { Commit } from '../types/brief.types'
 
-export function isNoise(title: string): boolean {
-    return NOISE_PATTERNS.some(pattern => pattern.test(title))
+export function isNoise(title: string, extra: RegExp[] = []): boolean {
+    return [...NOISE_PATTERNS, ...extra].some(pattern => pattern.test(title))
 }
 
-export function filterCommits(commits: Commit[]): {
+export function filterCommits(
+    commits: Commit[],
+    extra: RegExp[] = []
+): {
     dropped: number
     kept: Commit[]
 } {
@@ -13,7 +16,7 @@ export function filterCommits(commits: Commit[]): {
     const kept: Commit[] = []
 
     for (const commit of commits) {
-        if (isNoise(commit.title)) continue
+        if (isNoise(commit.title, extra)) continue
 
         if (commit.prNumber !== null) {
             if (seen.has(commit.prNumber)) continue

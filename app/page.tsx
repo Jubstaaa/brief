@@ -1,6 +1,42 @@
+import type { Metadata } from 'next'
+
+import JsonLd from '@/components/json-ld'
+import { REPOS } from '@/lib/constants/repos.constants'
+import {
+    SITE_DESCRIPTION,
+    SITE_NAME,
+    SITE_URL,
+} from '@/lib/constants/site.constants'
 import { readArchive } from '@/lib/storage/archive'
-import ArchiveView from '@/views/archive/archive'
+import LandingView from '@/views/landing/landing'
+
+export const metadata: Metadata = {
+    alternates: { canonical: '/' },
+    description: SITE_DESCRIPTION,
+    title: `${SITE_NAME} — React, Next.js ve React Native haftalık özeti`,
+}
 
 export default async function HomePage() {
-    return <ArchiveView entries={await readArchive()} />
+    const entries = await readArchive()
+
+    return (
+        <>
+            <JsonLd
+                schema={{
+                    '@context': 'https://schema.org',
+                    '@type': 'CollectionPage',
+                    'description': SITE_DESCRIPTION,
+                    'hasPart': REPOS.map(config => ({
+                        '@type': 'CollectionPage',
+                        'name': config.title,
+                        'url': `${SITE_URL}/${config.slug}`,
+                    })),
+                    'inLanguage': 'tr',
+                    'name': SITE_NAME,
+                    'url': SITE_URL,
+                }}
+            />
+            <LandingView entries={entries} />
+        </>
+    )
 }
