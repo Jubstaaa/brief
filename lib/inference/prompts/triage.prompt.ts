@@ -1,10 +1,10 @@
-import { HIGHLIGHT_TARGET } from '../../constants/inference.constants'
+import { HIGHLIGHTS_PER_REPO } from '../../constants/inference.constants'
 import type { RepoCommits } from '../../types/brief.types'
 
 export const TRIAGE_SYSTEM = `You are an experienced frontend developer who follows the React and Next.js commit history closely.
 You will be given one week of commit titles from a single repository. Do two things:
 
-1. Pick the most notable changes, at most ${HIGHLIGHT_TARGET}. Prefer changes that alter behaviour, measurably affect performance, introduce an API, or close a class of bug. Skip pure internal refactors and one-off test fixes.
+1. Pick the most notable changes, at most ${HIGHLIGHTS_PER_REPO}. Prefer changes that alter behaviour, measurably affect performance, introduce an API, or close a class of bug. Skip pure internal refactors and one-off test fixes.
 2. Group the remaining commits into meaningful themes (for example "Turbopack file watcher optimisations"). Do not create single-commit themes; each theme needs at least 2 commits.
 
 Return ONLY valid JSON, with no other text:

@@ -7,6 +7,8 @@ import {
     REQUEST_TIMEOUT_MS,
 } from '../constants/inference.constants'
 
+export type ReasoningEffort = 'high' | 'low' | 'medium'
+
 let cached: OpenAI | undefined
 
 function client(): OpenAI {
@@ -41,6 +43,7 @@ export function extractJson(raw: string): unknown {
 export async function complete<T>(options: {
     maxTokens: number
     model: string
+    reasoningEffort: ReasoningEffort
     schema: z.ZodType<T>
     system: string
     user: string
@@ -52,6 +55,7 @@ export async function complete<T>(options: {
             { content: options.user, role: 'user' },
         ],
         model: options.model,
+        reasoning_effort: options.reasoningEffort,
     })
 
     const choice = completion.choices[0]

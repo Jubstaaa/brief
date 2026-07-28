@@ -1,6 +1,11 @@
 import { compact } from 'es-toolkit'
 
-import { DRAFT_MAX_TOKENS, DRAFT_MODEL } from '../constants/inference.constants'
+import {
+    DRAFT_MAX_TOKENS,
+    DRAFT_MODEL,
+    DRAFT_REASONING_EFFORT,
+    MIN_THEME_PULLS,
+} from '../constants/inference.constants'
 import { complete } from '../inference/client'
 import { DRAFT_SYSTEM, draftUser } from '../inference/prompts/draft.prompt'
 import { draftSchema } from '../schemas/draft.schema'
@@ -35,6 +40,7 @@ export async function draft(
     const result = await complete({
         maxTokens: DRAFT_MAX_TOKENS,
         model: DRAFT_MODEL,
+        reasoningEffort: DRAFT_REASONING_EFFORT,
         schema: draftSchema,
         system: DRAFT_SYSTEM,
         user: draftUser(triaged, byPr),
@@ -57,11 +63,13 @@ export async function draft(
         })
     )
 
-    const themes: BriefTheme[] = result.themes.map(theme => ({
-        prs: compact(theme.prs.map(pr => byPr.get(pr))).map(toThemePull),
-        summary: theme.summary,
-        title: theme.title,
-    }))
+    const themes: BriefTheme[] = result.themes
+        .map(theme => ({
+            prs: compact(theme.prs.map(pr => byPr.get(pr))).map(toThemePull),
+            summary: theme.summary,
+            title: theme.title,
+        }))
+        .filter(theme => theme.prs.length >= MIN_THEME_PULLS)
 
     return { highlights, themes }
 }

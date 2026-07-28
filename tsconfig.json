@@ -4,7 +4,7 @@
         "target": "ESNext",
         "module": "esnext",
         "moduleResolution": "bundler",
-        "jsx": "preserve",
+        "jsx": "react-jsx",
         "allowJs": true,
         "esModuleInterop": true,
         "resolveJsonModule": true,
@@ -17,9 +17,21 @@
         "noUncheckedIndexedAccess": true,
         "noImplicitOverride": true,
         "types": ["bun"],
-        "paths": { "@/*": ["./*"] },
-        "plugins": [{ "name": "next" }]
+        "paths": {
+            "@/*": ["./*"]
+        },
+        "plugins": [
+            {
+                "name": "next"
+            }
+        ]
     },
-    "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+    "include": [
+        "next-env.d.ts",
+        "**/*.ts",
+        "**/*.tsx",
+        ".next/types/**/*.ts",
+        ".next/dev/types/**/*.ts"
+    ],
     "exclude": ["node_modules", "out"]
 }
