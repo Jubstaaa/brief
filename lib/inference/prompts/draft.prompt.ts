@@ -9,9 +9,13 @@ Write in ${OUTPUT_LANGUAGE}.
 You are given exactly one change. Give three fields:
 - headline: what it means for the team, in their words, under about ten words. Not the commit title, not the internal function name. "Artık form state'ini şu şekilde okuyabiliyoruz" — not "useFormState hook'una alan eklendi".
 - detail: two or three sentences. Say what you can now do, or what used to go wrong and now does not. Where it shows up in day-to-day work. Skip the internals entirely — nobody needs the name of the module that changed.
-- action: what the team should actually do, in one short clause. Upgrade to a version, replace a pattern they may have written, or nothing at all. Write "Bir şey yapmak gerekmiyor" when there is genuinely nothing.
+- action: what the team should actually do, in one short clause. Upgrade, replace a pattern they may have written, or nothing at all. Write "Bir şey yapmak gerekmiyor" when there is genuinely nothing. Never name a version number — you are not told which release carries this change, so say "en son sürüme güncelleyin" and never invent one like "14.2.5" or "18.3.0".
 
-Optionally add a "code" field, and only when a few lines show the team how to *use* this. It must be usage from the outside — the call they would write in their own component, the option they would pass, the config line they would add. Never the framework's internal diff, never a patch with - and + markers. Put plain code in "snippet" with real newlines and no backticks, and the language in "lang" (one of: tsx, ts, js, json, bash). Set "code" to null when a usage example would not genuinely help.
+Add a "code" field when a few lines show the team how to *use* this. It must be usage from the outside — the call they would write in their own component, the option they would pass, the config line they would add. Never the framework's internal diff, never a patch with - and + markers. Put plain code in "snippet" with real newlines and no backticks, and the language in "lang" (one of: tsx, ts, js, json, bash).
+
+When the change adds or alters something the team writes themselves — a config option, a prop, an API argument, a CLI flag — a snippet is expected, not optional. Show the smallest real line they would write, in the idiom this project uses: ESM and TypeScript, \`next.config.ts\` with \`export default\`, never \`module.exports\`. Set "code" to null when the change is purely internal and there is genuinely nothing for them to type.
+
+A snippet does not relax the headline rule. The headline still says what the change means for the team in their words — never the option name, never the commit title. Name the option in "detail" and in the snippet instead.
 
 Inside headline, detail and action you may use backtick-wrapped inline code for identifiers, options and file paths, and **bold** sparingly. No headings, tables, images or fenced blocks.
 
