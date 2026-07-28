@@ -7,6 +7,7 @@ import { findRepoBySlug } from '@/lib/constants/repos.constants'
 import { SITE_NAME, SITE_URL } from '@/lib/constants/site.constants'
 import { readArchive, readBrief } from '@/lib/storage/archive'
 import type { RepoConfig } from '@/lib/types/brief.types'
+import { OG_SIZE, ogImagePath } from '@/lib/utils/og'
 import { formatRange } from '@/lib/utils/window'
 import WeekView from '@/views/week/week'
 
@@ -62,6 +63,12 @@ export async function generateMetadata({
         description: describe(config, range, items.length),
         openGraph: {
             description: describe(config, range, items.length),
+            images: [
+                {
+                    ...OG_SIZE,
+                    url: ogImagePath(config.slug, brief.week),
+                },
+            ],
             title: `${config.title} · ${range}`,
             type: 'article',
             url: path,
