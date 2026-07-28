@@ -4,7 +4,7 @@ import { DRAFT_MODEL, TRIAGE_MODEL } from '../constants/inference.constants'
 import { REPOS } from '../constants/repos.constants'
 import { fetchCommits } from '../github/commits'
 import { fetchReleases } from '../github/releases'
-import { writeBrief } from '../storage/archive'
+import { publishBrief } from '../storage/publish'
 import type { Brief, BriefWindow, RepoCommits } from '../types/brief.types'
 
 import { draft, type DraftResult } from './draft'
@@ -119,8 +119,8 @@ export async function run(window: BriefWindow, dryRun: boolean): Promise<void> {
 
     const brief = assemble(window, repos, releases, await summarise(repos))
 
-    await writeBrief(brief)
+    await publishBrief(brief)
     consola.success(
-        `wrote data/${brief.week}.json — run \`bun run build\` to render the site`
+        `published ${brief.week} to Spaces — run \`bun run build\` to render the site`
     )
 }

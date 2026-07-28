@@ -24,13 +24,16 @@ enrich      PR body and changed-file list for the picked pull requests
    ↓
 draft       per change: what it does, and what it means in practice
    ↓
-data/       <week>.json
+publish     weeks/<week>.json + index.json → DigitalOcean Spaces
    ↓
-next build  static export → out/
+next build  reads the published JSON over HTTPS, static export → out/
 ```
 
-Model output is stored as JSON under `data/` and the pages are generated from it. Changing
+Model output lives as JSON in a Spaces bucket, and the pages are generated from it. Changing
 the design later means re-running `next build`, not paying for inference again.
+
+The split is deliberate: publishing needs write credentials, but the objects are public-read,
+so `next build` fetches them over plain HTTPS with no credentials at all.
 
 ## Commands
 
@@ -38,7 +41,7 @@ the design later means re-running `next build`, not paying for inference again.
 bun install
 
 bun run generate -- --dry-run    # fetch and filter only, no model calls
-bun run generate                 # full run for the current week → data/<week>.json
+bun run generate                 # full run for the current week → publishes to Spaces
 bun run generate -- --since=2026-07-20T21:00:00Z --until=2026-07-27T21:00:00Z --week=2026-07-28
 
 bun run dev                      # preview the pages locally
@@ -62,13 +65,19 @@ spending a token.
 | `BRIEF_TRIAGE_MODEL`    | model calls | defaults to `router:software-engineering`             |
 | `BRIEF_DRAFT_MODEL`     | model calls | defaults to `router:writing`                          |
 | `BRIEF_LANGUAGE`        | model calls | output language, defaults to `Turkish`                |
+| `SPACES_KEY`            | publishing  | Spaces access key, scoped to the bucket               |
+| `SPACES_SECRET`         | publishing  | Spaces secret key                                     |
+| `SPACES_BUCKET`         | both        | defaults to `brief-weekly`                            |
+| `SPACES_REGION`         | both        | defaults to `fra1`                                    |
 
 ## Deployment
 
-GitHub Actions runs it on a cron, commits `data/`, builds the static export, and rsyncs
-`out/` to the box where Caddy serves it. No container, no app server — just files.
+GitHub Actions runs it on a cron: generate publishes the week to Spaces, `next build`
+prerenders every week from there, and `out/` is rsynced to the box where Caddy serves it.
+No container, no app server — just files. Nothing is committed back to the repository.
 
-Repository secrets: `DO_INFERENCE_API_KEY`, `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`.
+Repository secrets: `DO_INFERENCE_API_KEY`, `SPACES_KEY`, `SPACES_SECRET`, `DEPLOY_SSH_KEY`,
+`DEPLOY_HOST`, `DEPLOY_USER`.
 
 ## Adding a repo
 

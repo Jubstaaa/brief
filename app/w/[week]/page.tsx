@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { notFound } from 'next/navigation'
 
-import { readBrief, readBriefs } from '@/lib/storage/archive'
+import { readArchive, readBrief } from '@/lib/storage/archive'
 import { formatRange } from '@/lib/utils/window'
 import WeekView from '@/views/week/week'
 
@@ -11,9 +11,9 @@ export interface WeekPageProps {
 }
 
 export async function generateStaticParams() {
-    const briefs = await readBriefs()
+    const entries = await readArchive()
 
-    return briefs.map(brief => ({ week: brief.week }))
+    return entries.map(entry => ({ week: entry.week }))
 }
 
 export async function generateMetadata({
