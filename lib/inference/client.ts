@@ -9,6 +9,18 @@ import {
 
 export type ReasoningEffort = 'high' | 'low' | 'medium'
 
+export interface UsageTotals {
+    calls: number
+    inputTokens: number
+    outputTokens: number
+}
+
+const totals: UsageTotals = { calls: 0, inputTokens: 0, outputTokens: 0 }
+
+export function usageTotals(): UsageTotals {
+    return { ...totals }
+}
+
 let cached: OpenAI | undefined
 
 function client(): OpenAI {
@@ -57,6 +69,10 @@ export async function complete<T>(options: {
         model: options.model,
         reasoning_effort: options.reasoningEffort,
     })
+
+    totals.calls += 1
+    totals.inputTokens += completion.usage?.prompt_tokens ?? 0
+    totals.outputTokens += completion.usage?.completion_tokens ?? 0
 
     const choice = completion.choices[0]
     const content = choice?.message?.content

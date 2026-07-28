@@ -4,6 +4,7 @@ import { DRAFT_MODEL, TRIAGE_MODEL } from '../constants/inference.constants'
 import { REPOS } from '../constants/repos.constants'
 import { fetchCommits } from '../github/commits'
 import { fetchReleases } from '../github/releases'
+import { usageTotals } from '../inference/client'
 import { publishBrief } from '../storage/publish'
 import type {
     Brief,
@@ -52,6 +53,21 @@ async function summarise(repos: RepoCommits[]): Promise<BriefItem[]> {
     return written
 }
 
+const INPUT_USD_PER_TOKEN = 0.07 / 1_000_000
+
+const OUTPUT_USD_PER_TOKEN = 0.49 / 1_000_000
+
+function buildUsage() {
+    const totals = usageTotals()
+
+    return {
+        ...totals,
+        costUsd:
+            totals.inputTokens * INPUT_USD_PER_TOKEN +
+            totals.outputTokens * OUTPUT_USD_PER_TOKEN,
+    }
+}
+
 function assemble(
     window: BriefWindow,
     repos: RepoCommits[],
@@ -78,6 +94,7 @@ function assemble(
         releases,
         since: window.since,
         until: window.until,
+        usage: buildUsage(),
         week: window.week,
     }
 }
@@ -120,6 +137,9 @@ export async function run(window: BriefWindow, dryRun: boolean): Promise<void> {
     const brief = assemble(window, repos, releases, await summarise(repos))
 
     await publishBrief(brief)
+    consola.info(
+        `inference: ${brief.usage.calls} calls, ${brief.usage.inputTokens} in / ${brief.usage.outputTokens} out, ~$${brief.usage.costUsd.toFixed(4)}`
+    )
     consola.success(
         `published ${brief.week} to Spaces — run \`bun run build\` to render the site`
     )

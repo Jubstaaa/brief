@@ -22,7 +22,7 @@ export const MIN_THEME_PULLS = 2
 
 export const MAX_RETRIES = 3
 
-export const REQUEST_TIMEOUT_MS = 300_000
+export const REQUEST_TIMEOUT_MS = 600_000
 
 export const TRIAGE_REASONING_EFFORT: ReasoningEffort = 'low'
 

@@ -77,6 +77,13 @@ export interface BriefCommit {
     url: string
 }
 
+export interface BriefUsage {
+    calls: number
+    costUsd: number
+    inputTokens: number
+    outputTokens: number
+}
+
 export interface Brief {
     commits: BriefCommit[]
     counts: BriefCount[]
@@ -87,6 +94,7 @@ export interface Brief {
     releases: Release[]
     since: string
     until: string
+    usage: BriefUsage
     week: string
 }
 
