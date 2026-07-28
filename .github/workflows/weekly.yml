@@ -1,0 +1,71 @@
+name: weekly
+
+on:
+    schedule:
+        - cron: '0 6 * * 2'
+    workflow_dispatch:
+        inputs:
+            since:
+                description: 'ISO start of window (optional)'
+                required: false
+            until:
+                description: 'ISO end of window (optional)'
+                required: false
+            week:
+                description: 'Week label, YYYY-MM-DD (optional)'
+                required: false
+
+concurrency:
+    group: weekly
+    cancel-in-progress: false
+
+permissions:
+    contents: write
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v4
+
+            - uses: oven-sh/setup-bun@v2
+
+            - run: bun install --frozen-lockfile
+
+            - run: bun test
+
+            - run: bun run type-check
+
+            - name: Generate
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  DO_INFERENCE_API_KEY: ${{ secrets.DO_INFERENCE_API_KEY }}
+              run: |
+                  args=""
+                  [ -n "${{ inputs.since }}" ] && args="$args --since=${{ inputs.since }}"
+                  [ -n "${{ inputs.until }}" ] && args="$args --until=${{ inputs.until }}"
+                  [ -n "${{ inputs.week }}" ] && args="$args --week=${{ inputs.week }}"
+                  bun run scripts/generate.ts $args
+
+            - name: Commit data
+              run: |
+                  git config user.name "github-actions[bot]"
+                  git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+                  git add data
+                  git diff --staged --quiet || git commit -m "chore: brief for $(date -u +%Y-%m-%d)"
+                  git push
+
+            - run: bun run build
+
+            - name: Deploy
+              env:
+                  SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+                  SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+                  SSH_USER: ${{ secrets.DEPLOY_USER }}
+              run: |
+                  mkdir -p ~/.ssh
+                  printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+                  chmod 600 ~/.ssh/id_ed25519
+                  ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+                  rsync -az --delete -e "ssh -i ~/.ssh/id_ed25519" \
+                      out/ "$SSH_USER@$SSH_HOST:/opt/proxy/sites/brief/"

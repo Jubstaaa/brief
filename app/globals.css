@@ -1,0 +1,76 @@
+@import 'tailwindcss';
+
+@theme inline {
+    --color-paper: var(--paper);
+    --color-panel: var(--panel);
+    --color-line: var(--line);
+    --color-ink: var(--ink);
+    --color-muted: var(--muted);
+    --color-accent: var(--accent);
+    --color-chip: var(--chip);
+}
+
+:root {
+    --paper: #fbfaf8;
+    --panel: #ffffff;
+    --line: #e5e1da;
+    --ink: #1a1917;
+    --muted: #6b665d;
+    --accent: #b4522d;
+    --chip: #f0ece4;
+    color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --paper: #131211;
+        --panel: #1b1a18;
+        --line: #2e2c28;
+        --ink: #eceae5;
+        --muted: #9a948a;
+        --accent: #e08a5f;
+        --chip: #242220;
+    }
+}
+
+@layer base {
+    body {
+        @apply bg-paper text-ink antialiased;
+    }
+
+    a {
+        @apply text-accent;
+    }
+
+    summary {
+        @apply cursor-pointer;
+    }
+}
+
+@utility section-heading {
+    @apply text-muted mt-14 mb-4 text-[13px] font-semibold tracking-[0.1em] uppercase;
+}
+
+@utility chip {
+    @apply border-line bg-chip text-muted rounded-full border px-3 py-[5px] text-[13px];
+}
+
+@utility panel {
+    @apply border-line bg-panel rounded-[10px] border;
+}
+
+@utility page-title {
+    @apply mb-2 text-3xl leading-[1.15] tracking-[-0.02em] sm:text-[40px];
+}
+
+@utility page-subtitle {
+    @apply text-muted m-0 text-[15px];
+}
+
+@utility page-footer {
+    @apply border-line text-muted mt-[72px] border-t pt-5 text-[13px];
+}
+
+@utility callout {
+    @apply border-line bg-panel text-muted mt-8 rounded-[10px] border border-dashed p-7 text-center;
+}
