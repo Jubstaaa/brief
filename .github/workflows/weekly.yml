@@ -1,4 +1,4 @@
-name: weekly
+name: Weekly
 
 on:
     schedule:
@@ -19,21 +19,18 @@ concurrency:
     group: weekly
     cancel-in-progress: false
 
-permissions:
-    contents: read
-
 jobs:
-    build:
+    generate:
         runs-on: ubuntu-latest
+        permissions:
+            contents: read
         steps:
-            - uses: actions/checkout@v4
-
+            - uses: actions/checkout@v7
             - uses: oven-sh/setup-bun@v2
-
+              with:
+                  bun-version: latest
             - run: bun install --frozen-lockfile
-
             - run: bun test
-
             - run: bun run type-check
 
             - name: Generate
@@ -49,17 +46,7 @@ jobs:
                   [ -n "${{ inputs.week }}" ] && args="$args --week=${{ inputs.week }}"
                   bun run scripts/generate.ts $args
 
-            - run: bun run build
-
-            - name: Deploy
-              env:
-                  SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-                  SSH_HOST: ${{ secrets.DEPLOY_HOST }}
-                  SSH_USER: ${{ secrets.DEPLOY_USER }}
-              run: |
-                  mkdir -p ~/.ssh
-                  printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
-                  chmod 600 ~/.ssh/id_ed25519
-                  ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-                  rsync -az --delete -e "ssh -i ~/.ssh/id_ed25519" \
-                      out/ "$SSH_USER@$SSH_HOST:/opt/proxy/sites/brief/"
+    publish:
+        needs: generate
+        uses: ./.github/workflows/deploy.yml
+        secrets: inherit

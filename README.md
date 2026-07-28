@@ -72,9 +72,18 @@ spending a token.
 
 ## Deployment
 
-GitHub Actions runs it on a cron: generate publishes the week to Spaces, `next build`
-prerenders every week from there, and `out/` is rsynced to the box where Caddy serves it.
-No container, no app server — just files. Nothing is committed back to the repository.
+Two workflows, and only one of them costs anything.
+
+`deploy.yml` is the whole deployment: it checks the code, runs `next build` against
+whatever is already in Spaces, and rsyncs `out/` to the box where Caddy serves it. It runs
+on every push to `main`, so a code change ships without regenerating a brief. Pull requests
+get the checks and stop there. No container, no app server — just files.
+
+`weekly.yml` runs on the Tuesday cron, publishes that week's JSON to Spaces, and then calls
+`deploy.yml` to render and ship it. The build always happens on a runner, never on the box,
+which has under 300 MB of RAM to spare.
+
+Nothing is committed back to the repository.
 
 Repository secrets: `DO_INFERENCE_API_KEY`, `SPACES_KEY`, `SPACES_SECRET`, `DEPLOY_SSH_KEY`,
 `DEPLOY_HOST`, `DEPLOY_USER`.
