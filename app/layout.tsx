@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 
 import type { Metadata } from 'next'
 
+import RepoLink from '@/components/repo-link'
 import {
     SITE_DESCRIPTION,
     SITE_LOCALE,
@@ -38,7 +39,8 @@ export default function RootLayout({ children }: RootLayoutProps) {
     return (
         <html lang="tr">
             <body>
-                <div className="mx-auto max-w-[820px] px-5 pt-12 pb-24">
+                <div className="relative mx-auto max-w-[820px] px-5 pt-12 pb-24">
+                    <RepoLink />
                     {children}
                 </div>
             </body>

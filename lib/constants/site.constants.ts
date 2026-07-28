@@ -8,3 +8,5 @@ export const SITE_DESCRIPTION =
     'React, Next.js ve React Native’de hafta hafta ne değişti.'
 
 export const SITE_LOCALE = 'tr_TR'
+
+export const SITE_REPO_URL = 'https://github.com/Jubstaaa/brief'
