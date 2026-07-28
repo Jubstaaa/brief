@@ -5,38 +5,21 @@ import {
     DRAFT_MODEL,
     DRAFT_REASONING_EFFORT,
     MAX_CODE_BLOCKS,
-    MIN_THEME_PULLS,
 } from '../constants/inference.constants'
 import { complete } from '../inference/client'
 import { DRAFT_SYSTEM, draftUser } from '../inference/prompts/draft.prompt'
 import { draftSchema } from '../schemas/draft.schema'
 import type { Triage } from '../schemas/triage.schema'
-import type {
-    BriefHighlight,
-    BriefTheme,
-    BriefThemePull,
-    PullDetail,
-} from '../types/brief.types'
-
-export interface DraftResult {
-    highlights: BriefHighlight[]
-    themes: BriefTheme[]
-}
-
-function toThemePull(detail: PullDetail): BriefThemePull {
-    return {
-        number: detail.number,
-        repo: detail.label,
-        title: detail.title,
-        url: detail.url,
-    }
-}
+import type { BriefItem, PullDetail } from '../types/brief.types'
 
 export async function draft(
     triaged: Triage,
     details: PullDetail[]
-): Promise<DraftResult> {
+): Promise<BriefItem[]> {
+    if (!triaged.picks.length) return []
+
     const byPr = new Map(details.map(detail => [detail.number, detail]))
+    const kindByPr = new Map(triaged.picks.map(pick => [pick.pr, pick.kind]))
 
     const result = await complete({
         maxTokens: DRAFT_MAX_TOKENS,
@@ -47,38 +30,31 @@ export async function draft(
         user: draftUser(triaged, byPr),
     })
 
-    const highlights = compact(
-        result.highlights.map(item => {
+    const items = compact(
+        result.items.map(item => {
             const detail = byPr.get(item.pr)
+            const kind = kindByPr.get(item.pr)
 
-            if (!detail) return undefined
+            if (!detail || !kind) return undefined
 
             return {
+                action: item.action,
                 code: item.code ?? null,
+                detail: item.detail,
+                headline: item.headline,
+                kind,
                 pr: item.pr,
                 repo: detail.label,
-                title: detail.title,
-                url: detail.url,
-                what: item.what,
-                why: item.why,
             }
         })
     )
 
     let codeBlocks = 0
-    for (const highlight of highlights) {
-        if (!highlight.code) continue
+    for (const item of items) {
+        if (!item.code) continue
         codeBlocks += 1
-        if (codeBlocks > MAX_CODE_BLOCKS) highlight.code = null
+        if (codeBlocks > MAX_CODE_BLOCKS) item.code = null
     }
 
-    const themes: BriefTheme[] = result.themes
-        .map(theme => ({
-            prs: compact(theme.prs.map(pr => byPr.get(pr))).map(toThemePull),
-            summary: theme.summary,
-            title: theme.title,
-        }))
-        .filter(theme => theme.prs.length >= MIN_THEME_PULLS)
-
-    return { highlights, themes }
+    return items
 }

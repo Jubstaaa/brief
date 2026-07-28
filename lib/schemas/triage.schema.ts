@@ -1,34 +1,36 @@
 import { z } from 'zod'
 
+export const briefKindSchema = z.enum([
+    'breaking',
+    'feature',
+    'fix',
+    'performance',
+    'security',
+])
+
 export const repoTriageSchema = z.object({
-    highlights: z
+    picks: z
         .array(
             z.object({
+                kind: briefKindSchema,
                 pr: z.number().int().positive(),
                 reason: z.string().min(1),
-            })
-        )
-        .max(20),
-    themes: z
-        .array(
-            z.object({
-                note: z.string().min(1),
-                prs: z.array(z.number().int().positive()),
-                title: z.string().min(1),
             })
         )
         .max(12),
 })
 
+export type BriefKind = z.infer<typeof briefKindSchema>
+
 export type RepoTriage = z.infer<typeof repoTriageSchema>
 
-export interface TriageHighlight {
+export interface TriagePick {
+    kind: BriefKind
     pr: number
     reason: string
     repo: string
 }
 
 export interface Triage {
-    highlights: TriageHighlight[]
-    themes: RepoTriage['themes']
+    picks: TriagePick[]
 }

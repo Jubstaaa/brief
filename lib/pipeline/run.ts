@@ -5,13 +5,18 @@ import { REPOS } from '../constants/repos.constants'
 import { fetchCommits } from '../github/commits'
 import { fetchReleases } from '../github/releases'
 import { publishBrief } from '../storage/publish'
-import type { Brief, BriefWindow, RepoCommits } from '../types/brief.types'
+import type {
+    Brief,
+    BriefItem,
+    BriefWindow,
+    RepoCommits,
+} from '../types/brief.types'
 
-import { draft, type DraftResult } from './draft'
+import { draft } from './draft'
 import { enrich } from './enrich'
 import { triage } from './triage'
 
-const EMPTY_DRAFT: DraftResult = { highlights: [], themes: [] }
+const NO_ITEMS: BriefItem[] = []
 
 async function collectCommits(window: BriefWindow): Promise<RepoCommits[]> {
     const repos: RepoCommits[] = []
@@ -27,16 +32,14 @@ async function collectCommits(window: BriefWindow): Promise<RepoCommits[]> {
     return repos
 }
 
-async function summarise(repos: RepoCommits[]): Promise<DraftResult> {
+async function summarise(repos: RepoCommits[]): Promise<BriefItem[]> {
     const kept = repos.reduce((total, repo) => total + repo.kept.length, 0)
 
-    if (kept === 0) return EMPTY_DRAFT
+    if (kept === 0) return NO_ITEMS
 
     consola.start('triaging')
     const triaged = await triage(repos)
-    consola.success(
-        `picked ${triaged.highlights.length} highlights, ${triaged.themes.length} themes`
-    )
+    consola.success(`picked ${triaged.picks.length} relevant changes`)
 
     consola.start('fetching pull request detail')
     const details = await enrich(triaged, repos)
@@ -44,9 +47,7 @@ async function summarise(repos: RepoCommits[]): Promise<DraftResult> {
 
     consola.start('writing')
     const written = await draft(triaged, details)
-    consola.success(
-        `wrote ${written.highlights.length} highlights, ${written.themes.length} themes`
-    )
+    consola.success(`wrote ${written.length} items`)
 
     return written
 }
@@ -55,7 +56,7 @@ function assemble(
     window: BriefWindow,
     repos: RepoCommits[],
     releases: Brief['releases'],
-    written: DraftResult
+    written: BriefItem[]
 ): Brief {
     return {
         commits: repos.flatMap(repo =>
@@ -71,12 +72,11 @@ function assemble(
             total: repo.total,
         })),
         generatedAt: new Date().toISOString(),
-        highlights: written.highlights,
+        items: written,
         model: `${TRIAGE_MODEL} + ${DRAFT_MODEL}`,
-        quiet: written.highlights.length === 0 && written.themes.length === 0,
+        quiet: written.length === 0,
         releases,
         since: window.since,
-        themes: written.themes,
         until: window.until,
         week: window.week,
     }

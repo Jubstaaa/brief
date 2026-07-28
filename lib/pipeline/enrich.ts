@@ -10,27 +10,10 @@ function refKey(ref: PullRef): string {
     return `${ref.repo}#${ref.pr}`
 }
 
-function repoOwning(repos: RepoCommits[], pr: number): string | undefined {
-    return repos.find(repo => repo.kept.some(commit => commit.prNumber === pr))
-        ?.label
-}
+function referencedPulls(triaged: Triage): PullRef[] {
+    const refs = triaged.picks.map(pick => ({ pr: pick.pr, repo: pick.repo }))
 
-function referencedPulls(triaged: Triage, repos: RepoCommits[]): PullRef[] {
-    const fromHighlights = triaged.highlights.map(highlight => ({
-        pr: highlight.pr,
-        repo: highlight.repo,
-    }))
-
-    const fromThemes = triaged.themes.flatMap(theme =>
-        compact(
-            theme.prs.map(pr => {
-                const repo = repoOwning(repos, pr)
-                return repo ? { pr, repo } : undefined
-            })
-        )
-    )
-
-    return uniqBy([...fromHighlights, ...fromThemes], refKey)
+    return uniqBy(refs, refKey)
 }
 
 function inWindow(repos: RepoCommits[]): Set<string> {
@@ -54,7 +37,7 @@ export async function enrich(
     const known = inWindow(repos)
     const details: PullDetail[] = []
 
-    for (const ref of referencedPulls(triaged, repos)) {
+    for (const ref of referencedPulls(triaged)) {
         const config = findRepo(ref.repo)
 
         if (!config) {

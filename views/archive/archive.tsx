@@ -32,8 +32,8 @@ export default function ArchiveView({ entries }: ArchiveViewProps) {
                                         {formatRange(entry.since, entry.until)}
                                     </span>
                                     <small className="text-muted text-[13px] whitespace-nowrap">
-                                        {entry.highlightCount} öne çıkan ·{' '}
-                                        {entry.total} commit
+                                        {entry.itemCount} madde · {entry.total}{' '}
+                                        commit
                                     </small>
                                 </Link>
                             </li>

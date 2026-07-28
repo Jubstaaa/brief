@@ -1,3 +1,5 @@
+import type { BriefKind } from '../schemas/triage.schema'
+
 export interface RepoConfig {
     label: string
     owner: string
@@ -53,27 +55,14 @@ export interface BriefCode {
     snippet: string
 }
 
-export interface BriefHighlight {
+export interface BriefItem {
+    action: string
     code?: BriefCode | null
+    detail: string
+    headline: string
+    kind: BriefKind
     pr: number
     repo: string
-    title: string
-    url: string
-    what: string
-    why: string
-}
-
-export interface BriefThemePull {
-    number: number
-    repo: string
-    title: string
-    url: string
-}
-
-export interface BriefTheme {
-    prs: BriefThemePull[]
-    summary: string
-    title: string
 }
 
 export interface BriefCount {
@@ -92,18 +81,17 @@ export interface Brief {
     commits: BriefCommit[]
     counts: BriefCount[]
     generatedAt: string
-    highlights: BriefHighlight[]
+    items: BriefItem[]
     model: string
     quiet: boolean
     releases: Release[]
     since: string
-    themes: BriefTheme[]
     until: string
     week: string
 }
 
 export interface ArchiveEntry {
-    highlightCount: number
+    itemCount: number
     since: string
     total: number
     until: string

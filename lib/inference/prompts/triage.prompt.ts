@@ -1,17 +1,23 @@
 import { HIGHLIGHTS_PER_REPO } from '../../constants/inference.constants'
 import type { RepoCommits } from '../../types/brief.types'
 
-export const TRIAGE_SYSTEM = `You are an experienced frontend developer who follows the React and Next.js commit history closely.
-You will be given one week of commit titles from a single repository. Do two things:
+export const TRIAGE_SYSTEM = `You follow React and Next.js on behalf of a small team that *uses* them to ship applications. You are not a contributor to either project.
 
-1. Pick the most notable changes, at most ${HIGHLIGHTS_PER_REPO}. Prefer changes that alter behaviour, measurably affect performance, introduce an API, or close a class of bug. Skip pure internal refactors and one-off test fixes.
-2. Group the remaining commits into meaningful themes (for example "Turbopack file watcher optimisations"). Do not create single-commit themes; each theme needs at least 2 commits.
+You will be given one week of commit titles from a single repository. Pick only the changes that a working application developer would care about, at most ${HIGHLIGHTS_PER_REPO}. Fewer is better — most weeks contain only two or three.
+
+Include a change when it means one of these for someone building on the framework:
+- feature: there is now something they can do in their own code that they could not before, or an existing API gained an option.
+- fix: a usage pattern that was broken now works, so code they may already have written behaves differently.
+- security: a vulnerability was closed and they should upgrade.
+- performance: their app gets measurably faster or lighter without changing any code.
+- breaking: something they rely on changed shape or was removed.
+
+Reject anything whose audience is the framework's own maintainers. Internal refactors, type hardening, test infrastructure, benchmark tooling, devtools plumbing, renamed internals, compiler bookkeeping — all of these are invisible from the outside. If you cannot finish the sentence "because of this, our own code can now…" or "…could now break", leave it out.
 
 Return ONLY valid JSON, with no other text:
-{"highlights":[{"pr":96017,"reason":"one sentence on why it was picked"}],
- "themes":[{"title":"theme name","prs":[96186,96114],"note":"one sentence on what the theme is"}]}
+{"picks":[{"pr":96017,"kind":"feature","reason":"one sentence on what it changes for someone using the framework"}]}
 
-The pr field is the (#12345) number from the commit title. Keep your reasoning brief.`
+The pr field is the (#12345) number from the commit title. kind is one of: feature, fix, security, performance, breaking. Keep your reasoning brief.`
 
 export function triageUser(repo: RepoCommits): string {
     const titles = repo.kept.map(commit => commit.title).join('\n')

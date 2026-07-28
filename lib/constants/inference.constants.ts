@@ -14,9 +14,9 @@ export const TRIAGE_MAX_TOKENS = 8_000
 
 export const DRAFT_MAX_TOKENS = 12_000
 
-export const HIGHLIGHT_TARGET = 9
+export const HIGHLIGHT_TARGET = 6
 
-export const HIGHLIGHTS_PER_REPO = 6
+export const HIGHLIGHTS_PER_REPO = 4
 
 export const MIN_THEME_PULLS = 2
 

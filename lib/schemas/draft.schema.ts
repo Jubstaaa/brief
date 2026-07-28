@@ -1,21 +1,18 @@
 import { z } from 'zod'
 
 export const draftSchema = z.object({
-    highlights: z.array(
+    items: z.array(
         z.object({
+            action: z.string().min(1),
             code: z
-                .object({ lang: z.string().min(1), snippet: z.string().min(1) })
+                .object({
+                    lang: z.string().min(1),
+                    snippet: z.string().min(1),
+                })
                 .nullish(),
+            detail: z.string().min(1),
+            headline: z.string().min(1),
             pr: z.number().int().positive(),
-            what: z.string().min(1),
-            why: z.string().min(1),
-        })
-    ),
-    themes: z.array(
-        z.object({
-            prs: z.array(z.number().int().positive()),
-            summary: z.string().min(1),
-            title: z.string().min(1),
         })
     ),
 })

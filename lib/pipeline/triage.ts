@@ -11,11 +11,11 @@ import { TRIAGE_SYSTEM, triageUser } from '../inference/prompts/triage.prompt'
 import {
     repoTriageSchema,
     type Triage,
-    type TriageHighlight,
+    type TriagePick,
 } from '../schemas/triage.schema'
 import type { RepoCommits } from '../types/brief.types'
 
-const EMPTY: Triage = { highlights: [], themes: [] }
+const EMPTY: Triage = { picks: [] }
 
 async function triageRepo(repo: RepoCommits): Promise<Triage> {
     if (!repo.kept.length) return EMPTY
@@ -30,26 +30,19 @@ async function triageRepo(repo: RepoCommits): Promise<Triage> {
     })
 
     return {
-        highlights: result.highlights.map(highlight => ({
-            ...highlight,
-            repo: repo.label,
-        })),
-        themes: result.themes,
+        picks: result.picks.map(pick => ({ ...pick, repo: repo.label })),
     }
 }
 
-function interleave(
-    groups: TriageHighlight[][],
-    limit: number
-): TriageHighlight[] {
+function interleave(groups: TriagePick[][], limit: number): TriagePick[] {
     const longest = Math.max(0, ...groups.map(group => group.length))
-    const picked: TriageHighlight[] = []
+    const picked: TriagePick[] = []
 
     for (let index = 0; index < longest && picked.length < limit; index++) {
         for (const group of groups) {
             if (picked.length >= limit) break
-            const highlight = group[index]
-            if (highlight) picked.push(highlight)
+            const pick = group[index]
+            if (pick) picked.push(pick)
         }
     }
 
@@ -67,10 +60,9 @@ export async function triage(repos: RepoCommits[]): Promise<Triage> {
     )
 
     return {
-        highlights: interleave(
-            results.map(result => result.highlights),
+        picks: interleave(
+            results.map(result => result.picks),
             HIGHLIGHT_TARGET
         ),
-        themes: results.flatMap(result => result.themes),
     }
 }
