@@ -1,6 +1,11 @@
 import { consola } from 'consola'
 
-import { DRAFT_MODEL, TRIAGE_MODEL } from '../constants/inference.constants'
+import {
+    DRAFT_MODEL,
+    INPUT_USD_PER_MTOK,
+    OUTPUT_USD_PER_MTOK,
+    TRIAGE_MODEL,
+} from '../constants/inference.constants'
 import { REPOS } from '../constants/repos.constants'
 import { fetchCommits } from '../github/commits'
 import { fetchReleases } from '../github/releases'
@@ -9,6 +14,7 @@ import { publishBrief } from '../storage/publish'
 import type {
     Brief,
     BriefItem,
+    BriefUsage,
     BriefWindow,
     RepoCommits,
 } from '../types/brief.types'
@@ -53,18 +59,19 @@ async function summarise(repos: RepoCommits[]): Promise<BriefItem[]> {
     return written
 }
 
-const INPUT_USD_PER_TOKEN = 0.07 / 1_000_000
-
-const OUTPUT_USD_PER_TOKEN = 0.49 / 1_000_000
-
-function buildUsage() {
+function buildUsage(): BriefUsage {
     const totals = usageTotals()
+
+    if (INPUT_USD_PER_MTOK === undefined || OUTPUT_USD_PER_MTOK === undefined) {
+        return totals
+    }
 
     return {
         ...totals,
         costUsd:
-            totals.inputTokens * INPUT_USD_PER_TOKEN +
-            totals.outputTokens * OUTPUT_USD_PER_TOKEN,
+            (totals.inputTokens * INPUT_USD_PER_MTOK +
+                totals.outputTokens * OUTPUT_USD_PER_MTOK) /
+            1_000_000,
     }
 }
 
@@ -137,8 +144,10 @@ export async function run(window: BriefWindow, dryRun: boolean): Promise<void> {
     const brief = assemble(window, repos, releases, await summarise(repos))
 
     await publishBrief(brief)
+    const { calls, costUsd, inputTokens, outputTokens } = brief.usage
     consola.info(
-        `inference: ${brief.usage.calls} calls, ${brief.usage.inputTokens} in / ${brief.usage.outputTokens} out, ~$${brief.usage.costUsd.toFixed(4)}`
+        `inference: ${calls} calls, ${inputTokens} in / ${outputTokens} out` +
+            (costUsd === undefined ? '' : `, ~$${costUsd.toFixed(4)}`)
     )
     consola.success(
         `published ${brief.week} to Spaces — run \`bun run build\` to render the site`

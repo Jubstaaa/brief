@@ -55,7 +55,7 @@ export function extractJson(raw: string): unknown {
 export async function complete<T>(options: {
     maxTokens: number
     model: string
-    reasoningEffort: ReasoningEffort
+    reasoningEffort?: ReasoningEffort
     schema: z.ZodType<T>
     system: string
     user: string
@@ -67,7 +67,9 @@ export async function complete<T>(options: {
             { content: options.user, role: 'user' },
         ],
         model: options.model,
-        reasoning_effort: options.reasoningEffort,
+        ...(options.reasoningEffort
+            ? { reasoning_effort: options.reasoningEffort }
+            : {}),
     })
 
     totals.calls += 1

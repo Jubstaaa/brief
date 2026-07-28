@@ -79,7 +79,7 @@ export interface BriefCommit {
 
 export interface BriefUsage {
     calls: number
-    costUsd: number
+    costUsd?: number
     inputTokens: number
     outputTokens: number
 }

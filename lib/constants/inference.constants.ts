@@ -1,12 +1,25 @@
-import type { ReasoningEffort } from '../inference/client'
+function usdPerMtok(variable: string): number | undefined {
+    const raw = process.env[variable]
+
+    if (!raw) return undefined
+
+    const parsed = Number(raw)
+
+    if (!Number.isFinite(parsed) || parsed < 0) {
+        throw new Error(
+            `${variable} must be a non-negative number, got "${raw}"`
+        )
+    }
+
+    return parsed
+}
 
 export const INFERENCE_BASE_URL =
     process.env.DO_INFERENCE_BASE_URL ?? 'https://inference.do-ai.run/v1'
 
-export const TRIAGE_MODEL =
-    process.env.BRIEF_TRIAGE_MODEL ?? 'router:software-engineering'
+export const TRIAGE_MODEL = process.env.BRIEF_TRIAGE_MODEL ?? 'gemma-4-31B-it'
 
-export const DRAFT_MODEL = process.env.BRIEF_DRAFT_MODEL ?? 'router:writing'
+export const DRAFT_MODEL = process.env.BRIEF_DRAFT_MODEL ?? 'gemma-4-31B-it'
 
 export const OUTPUT_LANGUAGE = process.env.BRIEF_LANGUAGE ?? 'Turkish'
 
@@ -24,8 +37,8 @@ export const MAX_RETRIES = 3
 
 export const REQUEST_TIMEOUT_MS = 600_000
 
-export const TRIAGE_REASONING_EFFORT: ReasoningEffort = 'low'
-
-export const DRAFT_REASONING_EFFORT: ReasoningEffort = 'medium'
-
 export const MAX_CODE_BLOCKS = 3
+
+export const INPUT_USD_PER_MTOK = usdPerMtok('BRIEF_INPUT_USD_PER_MTOK')
+
+export const OUTPUT_USD_PER_MTOK = usdPerMtok('BRIEF_OUTPUT_USD_PER_MTOK')
