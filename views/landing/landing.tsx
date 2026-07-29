@@ -1,6 +1,8 @@
+import Image from 'next/image'
 import Link from 'next/link'
 
 import { REPOS } from '@/lib/constants/repos.constants'
+import { SITE_LOGO_PATH, SITE_NAME } from '@/lib/constants/site.constants'
 import type { ArchiveEntry } from '@/lib/types/brief.types'
 import { formatRange } from '@/lib/utils/window'
 
@@ -21,7 +23,16 @@ function latestFor(
 export default function LandingView({ entries }: LandingViewProps) {
     return (
         <>
-            <h1 className="page-title">brief</h1>
+            <h1 className="page-title flex items-center gap-3">
+                <Image
+                    priority
+                    alt=""
+                    height={30}
+                    src={SITE_LOGO_PATH}
+                    width={30}
+                />
+                {SITE_NAME}
+            </h1>
             <p className="page-subtitle">
                 React, Next.js ve React Native&rsquo;de hafta hafta ne değişti.
             </p>

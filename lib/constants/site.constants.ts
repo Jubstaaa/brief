@@ -9,4 +9,6 @@ export const SITE_DESCRIPTION =
 
 export const SITE_LOCALE = 'tr_TR'
 
+export const SITE_LOGO_PATH = '/logo.svg'
+
 export const SITE_REPO_URL = 'https://github.com/Jubstaaa/brief'

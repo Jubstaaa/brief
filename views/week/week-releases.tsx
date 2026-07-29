@@ -11,7 +11,9 @@ export default function WeekReleases({ releases }: WeekReleasesProps) {
                     <li key={release.url}>
                         <a
                             className="border-line bg-chip rounded-md border px-3 py-1 font-mono text-sm no-underline"
-                            href={release.url}>
+                            href={release.url}
+                            rel="noreferrer noopener"
+                            target="_blank">
                             {release.label} {release.tag}
                         </a>
                     </li>

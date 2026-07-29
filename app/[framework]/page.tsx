@@ -29,7 +29,12 @@ export async function generateMetadata({
     if (!config) return {}
 
     return {
-        alternates: { canonical: `/${config.slug}` },
+        alternates: {
+            canonical: `/${config.slug}`,
+            types: {
+                'application/rss+xml': `/${config.slug}/feed.xml`,
+            },
+        },
         description: describe(config.title),
         title: `${config.title} haftalık özet · ${SITE_NAME}`,
     }

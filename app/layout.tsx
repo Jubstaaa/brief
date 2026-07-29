@@ -2,18 +2,24 @@ import type { ReactNode } from 'react'
 
 import type { Metadata } from 'next'
 
-import RepoLink from '@/components/repo-link/repo-link'
+import { SiGithub } from '@icons-pack/react-simple-icons'
+
 import {
     SITE_DESCRIPTION,
     SITE_LOCALE,
     SITE_NAME,
+    SITE_REPO_URL,
     SITE_URL,
 } from '@/lib/constants/site.constants'
 
 import './globals.css'
 
 export const metadata: Metadata = {
+    alternates: {
+        types: { 'application/rss+xml': '/feed.xml' },
+    },
     description: SITE_DESCRIPTION,
+    icons: { icon: '/logo.svg' },
     metadataBase: new URL(SITE_URL),
     openGraph: {
         description: SITE_DESCRIPTION,
@@ -40,7 +46,14 @@ export default function RootLayout({ children }: RootLayoutProps) {
         <html lang="tr">
             <body>
                 <div className="relative mx-auto max-w-3xl px-5 pt-12 pb-24">
-                    <RepoLink />
+                    <a
+                        aria-label="Kaynak kodu GitHub'da"
+                        className="text-muted hover:text-ink absolute top-4 right-5 transition-colors"
+                        href={SITE_REPO_URL}
+                        rel="noreferrer noopener"
+                        target="_blank">
+                        <SiGithub size={20} />
+                    </a>
                     {children}
                 </div>
             </body>

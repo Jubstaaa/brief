@@ -11,7 +11,10 @@ import { readArchive } from '@/lib/storage/archive'
 import LandingView from '@/views/landing/landing'
 
 export const metadata: Metadata = {
-    alternates: { canonical: '/' },
+    alternates: {
+        canonical: '/',
+        types: { 'application/rss+xml': '/feed.xml' },
+    },
     description: SITE_DESCRIPTION,
     title: `${SITE_NAME} — React, Next.js ve React Native haftalık özeti`,
 }

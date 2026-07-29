@@ -1,6 +1,6 @@
 import { findRepoBySlug, REPOS } from '@/lib/constants/repos.constants'
 import { readArchive } from '@/lib/storage/archive'
-import { buildFeed } from '@/lib/utils/feed'
+import { buildFrameworkFeed } from '@/lib/utils/feed'
 
 export const dynamic = 'force-static'
 
@@ -21,7 +21,7 @@ export async function GET(
         entry.frameworks.some(item => item.slug === config.slug)
     )
 
-    return new Response(buildFeed(config, entries), {
+    return new Response(buildFrameworkFeed(config, entries), {
         headers: { 'Content-Type': 'application/rss+xml; charset=utf-8' },
     })
 }
