@@ -2,7 +2,7 @@ import type { Metadata } from 'next'
 
 import { notFound } from 'next/navigation'
 
-import JsonLd from '@/components/json-ld'
+import JsonLd from '@/components/json-ld/json-ld'
 import { findRepoBySlug, REPOS } from '@/lib/constants/repos.constants'
 import { SITE_NAME, SITE_URL } from '@/lib/constants/site.constants'
 import { readArchive } from '@/lib/storage/archive'

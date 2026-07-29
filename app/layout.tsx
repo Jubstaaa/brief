@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 
 import type { Metadata } from 'next'
 
-import RepoLink from '@/components/repo-link'
+import RepoLink from '@/components/repo-link/repo-link'
 import {
     SITE_DESCRIPTION,
     SITE_LOCALE,

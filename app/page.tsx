@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 
-import JsonLd from '@/components/json-ld'
+import JsonLd from '@/components/json-ld/json-ld'
 import { REPOS } from '@/lib/constants/repos.constants'
 import {
     SITE_DESCRIPTION,

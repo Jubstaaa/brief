@@ -1,4 +1,4 @@
-import Prose from '@/components/prose'
+import Prose from '@/components/prose/prose'
 
 import { KIND_LABELS } from './week.constants'
 import type { WeekItemProps } from './week.types'
