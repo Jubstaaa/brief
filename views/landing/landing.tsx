@@ -4,11 +4,12 @@ import { REPOS } from '@/lib/constants/repos.constants'
 import type { ArchiveEntry } from '@/lib/types/brief.types'
 import { formatRange } from '@/lib/utils/window'
 
-export interface LandingViewProps {
-    entries: ArchiveEntry[]
-}
+import type { LandingViewProps, LatestWeek } from './landing.types'
 
-function latestFor(entries: ArchiveEntry[], slug: string) {
+function latestFor(
+    entries: ArchiveEntry[],
+    slug: string
+): LatestWeek | undefined {
     for (const entry of entries) {
         const framework = entry.frameworks.find(item => item.slug === slug)
         if (framework) return { entry, itemCount: framework.itemCount }
@@ -42,7 +43,7 @@ export default function LandingView({ entries }: LandingViewProps) {
                                         className="text-ink hover:text-accent flex flex-col items-baseline gap-1 px-0.5 py-4 no-underline sm:flex-row sm:justify-between sm:gap-4"
                                         href={`/${config.slug}`}>
                                         <span>{config.title}</span>
-                                        <small className="text-muted text-[13px] whitespace-nowrap">
+                                        <small className="text-muted text-sm whitespace-nowrap">
                                             {latest
                                                 ? `${formatRange(latest.entry.since, latest.entry.until)} · ${latest.itemCount} madde`
                                                 : 'henüz madde yok'}

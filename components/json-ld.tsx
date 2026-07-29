@@ -1,6 +1,4 @@
-export interface JsonLdProps {
-    schema: Record<string, unknown>
-}
+import type { JsonLdProps } from './json-ld.types'
 
 export default function JsonLd({ schema }: JsonLdProps) {
     return (

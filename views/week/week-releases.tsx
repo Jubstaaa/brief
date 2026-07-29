@@ -1,8 +1,4 @@
-import type { Release } from '@/lib/types/brief.types'
-
-export interface WeekReleasesProps {
-    releases: Release[]
-}
+import type { WeekReleasesProps } from './week.types'
 
 export default function WeekReleases({ releases }: WeekReleasesProps) {
     if (!releases.length) return null
@@ -14,7 +10,7 @@ export default function WeekReleases({ releases }: WeekReleasesProps) {
                 {releases.map(release => (
                     <li key={release.url}>
                         <a
-                            className="border-line bg-chip rounded-md border px-[11px] py-[5px] font-mono text-[13px] no-underline"
+                            className="border-line bg-chip rounded-md border px-3 py-1 font-mono text-sm no-underline"
                             href={release.url}>
                             {release.label} {release.tag}
                         </a>

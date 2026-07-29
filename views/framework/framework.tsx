@@ -1,18 +1,14 @@
 import Link from 'next/link'
 
-import type { ArchiveEntry, RepoConfig } from '@/lib/types/brief.types'
 import { formatRange } from '@/lib/utils/window'
 
-export interface FrameworkViewProps {
-    config: RepoConfig
-    entries: ArchiveEntry[]
-}
+import type { FrameworkViewProps } from './framework.types'
 
 export default function FrameworkView({ config, entries }: FrameworkViewProps) {
     return (
         <>
             <Link
-                className="text-muted mb-7 inline-block text-[13px] no-underline"
+                className="text-muted mb-7 inline-block text-sm no-underline"
                 href="/">
                 ← tüm kategoriler
             </Link>
@@ -37,7 +33,7 @@ export default function FrameworkView({ config, entries }: FrameworkViewProps) {
                                     <span>
                                         {formatRange(entry.since, entry.until)}
                                     </span>
-                                    <small className="text-muted text-[13px] whitespace-nowrap">
+                                    <small className="text-muted text-sm whitespace-nowrap">
                                         {entry.frameworks.find(
                                             item => item.slug === config.slug
                                         )?.itemCount ?? 0}{' '}

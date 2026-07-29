@@ -39,7 +39,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
     return (
         <html lang="tr">
             <body>
-                <div className="relative mx-auto max-w-[820px] px-5 pt-12 pb-24">
+                <div className="relative mx-auto max-w-3xl px-5 pt-12 pb-24">
                     <RepoLink />
                     {children}
                 </div>

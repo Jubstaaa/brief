@@ -1,21 +1,11 @@
 import Link from 'next/link'
 
-import type {
-    Brief,
-    BriefItem,
-    Release,
-    RepoConfig,
-} from '@/lib/types/brief.types'
+import type { Release } from '@/lib/types/brief.types'
 import { formatRange } from '@/lib/utils/window'
 
 import WeekItem from './week-item'
 import WeekReleases from './week-releases'
-
-export interface WeekViewProps {
-    brief: Brief
-    config: RepoConfig
-    items: BriefItem[]
-}
+import type { WeekViewProps } from './week.types'
 
 function releasesFor(releases: Release[], label: string): Release[] {
     return releases.filter(release => release.label === label)
@@ -28,7 +18,7 @@ export default function WeekView({ brief, config, items }: WeekViewProps) {
     return (
         <>
             <Link
-                className="text-muted mb-7 inline-block text-[13px] no-underline"
+                className="text-muted mb-7 inline-block text-sm no-underline"
                 href={`/${config.slug}`}>
                 ← {config.title} haftaları
             </Link>
