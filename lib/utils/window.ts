@@ -1,5 +1,6 @@
 import { TZDate } from '@date-fns/tz'
 import {
+    addHours,
     format,
     isTuesday,
     previousTuesday,
@@ -12,6 +13,11 @@ import type { BriefWindow } from '../types/brief.types'
 
 const TIME_ZONE = 'Europe/Istanbul'
 
+// The weekly job fires Tuesdays at 09:00 Istanbul. The window is anchored to
+// that hour rather than midnight so a commit landing on Tuesday morning makes
+// it into the brief published the same day instead of waiting a week.
+const ANCHOR_HOUR = 9
+
 function inZone(date: Date): TZDate {
     return new TZDate(date, TIME_ZONE)
 }
@@ -22,7 +28,11 @@ function toUtcIso(date: Date): string {
 
 export function resolveWindow(now: Date): BriefWindow {
     const local = inZone(now)
-    const until = startOfDay(isTuesday(local) ? local : previousTuesday(local))
+    const anchored =
+        isTuesday(local) && local.getHours() >= ANCHOR_HOUR
+            ? local
+            : previousTuesday(local)
+    const until = addHours(startOfDay(anchored), ANCHOR_HOUR)
     const since = subWeeks(until, 1)
 
     return {
