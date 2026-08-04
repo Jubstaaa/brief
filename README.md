@@ -95,7 +95,9 @@ PAT eventually expires.
 Nothing is committed back to the repository.
 
 Repository secrets: `DO_INFERENCE_API_KEY`, `SPACES_KEY`, `SPACES_SECRET`, `DEPLOY_SSH_KEY`,
-`DEPLOY_HOST`, `DEPLOY_USER`.
+`DEPLOY_HOST`, `DEPLOY_USER`. They are not edited here: Infisical (project `brief-site`,
+`prod` environment) is the source of truth and a secret sync pushes changes to this
+repository's Actions secrets automatically.
 
 ## Adding a repo
 
