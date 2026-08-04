@@ -44,7 +44,7 @@ async function load(params: WeekPageProps['params']) {
 }
 
 function describe(config: RepoConfig, range: string, count: number): string {
-    return `${range} arasında ${config.title}'de değişen ve bizi ilgilendiren ${count} şey.`
+    return `${range} arasında ${config.locative} değişen ve bizi ilgilendiren ${count} şey.`
 }
 
 export async function generateMetadata({

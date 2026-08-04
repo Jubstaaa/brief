@@ -2,6 +2,7 @@ import type { BriefKind } from '../schemas/triage.schema'
 
 export interface RepoConfig {
     label: string
+    locative: string
     noise?: RegExp[]
     owner: string
     repo: string

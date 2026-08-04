@@ -7,9 +7,13 @@ const REACT_NATIVE_NOISE: RegExp[] = [
     /^xplat\/js\//i,
 ]
 
+// `locative` is the title with its Turkish -de/-da suffix attached ("Expo'da
+// hafta hafta ne değişti"). It is data rather than string math because the
+// right suffix follows the name's pronunciation, which no code can derive.
 export const REPOS: RepoConfig[] = [
     {
         label: 'react',
+        locative: "React'te",
         owner: 'facebook',
         repo: 'react',
         slug: 'react',
@@ -17,6 +21,7 @@ export const REPOS: RepoConfig[] = [
     },
     {
         label: 'next.js',
+        locative: "Next.js'te",
         owner: 'vercel',
         repo: 'next.js',
         slug: 'next-js',
@@ -24,6 +29,7 @@ export const REPOS: RepoConfig[] = [
     },
     {
         label: 'react-native',
+        locative: "React Native'de",
         noise: REACT_NATIVE_NOISE,
         owner: 'facebook',
         repo: 'react-native',
@@ -32,6 +38,7 @@ export const REPOS: RepoConfig[] = [
     },
     {
         label: 'expo',
+        locative: "Expo'da",
         owner: 'expo',
         repo: 'expo',
         slug: 'expo',

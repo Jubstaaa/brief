@@ -6,18 +6,23 @@ export const SITE_URL = (
 
 export const SITE_NAME = 'brief'
 
-// Derived from REPOS so adding a framework never leaves the copy behind. The
-// list is joined without a Turkish case suffix on purpose: the right suffix
-// depends on the last title's vowels ("Expo'da" vs "Native'de"), and no
-// framework name should be able to break the sentence.
+// Derived from REPOS so adding a framework never leaves the copy behind. In a
+// Turkish list the case suffix sits on the last item and covers the whole
+// enumeration, so the sentence ends with that repo's `locative`.
 const titles = REPOS.map(repo => repo.title)
+const locatives = REPOS.map(repo => repo.locative)
 
 export const SITE_FRAMEWORKS =
     titles.length === 1
-        ? titles[0]
+        ? titles.join('')
         : `${titles.slice(0, -1).join(', ')} ve ${titles.at(-1)}`
 
-export const SITE_DESCRIPTION = `${SITE_FRAMEWORKS} — hafta hafta ne değişti.`
+const framesWithSuffix =
+    locatives.length === 1
+        ? locatives.join('')
+        : `${titles.slice(0, -1).join(', ')} ve ${locatives.at(-1)}`
+
+export const SITE_DESCRIPTION = `${framesWithSuffix} hafta hafta ne değişti.`
 
 export const SITE_LOCALE = 'tr_TR'
 

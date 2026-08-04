@@ -2,7 +2,11 @@ import Image from 'next/image'
 import Link from 'next/link'
 
 import { REPOS } from '@/lib/constants/repos.constants'
-import { SITE_LOGO_PATH, SITE_NAME } from '@/lib/constants/site.constants'
+import {
+    SITE_DESCRIPTION,
+    SITE_LOGO_PATH,
+    SITE_NAME,
+} from '@/lib/constants/site.constants'
 import type { ArchiveEntry } from '@/lib/types/brief.types'
 import { formatRange } from '@/lib/utils/window'
 
@@ -33,9 +37,7 @@ export default function LandingView({ entries }: LandingViewProps) {
                 />
                 {SITE_NAME}
             </h1>
-            <p className="page-subtitle">
-                React, Next.js ve React Native&rsquo;de hafta hafta ne değişti.
-            </p>
+            <p className="page-subtitle">{SITE_DESCRIPTION}</p>
 
             {entries.length === 0 ? (
                 <div className="callout">Henüz hafta yok.</div>

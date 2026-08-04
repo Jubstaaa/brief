@@ -22,7 +22,7 @@ export function buildFrameworkFeed(
 
     const feed = new Feed({
         copyright: SITE_NAME,
-        description: `${config.title}'de hafta hafta ne değişti.`,
+        description: `${config.locative} hafta hafta ne değişti.`,
         feedLinks: { rss: `${home}/feed.xml` },
         id: home,
         language: 'tr',

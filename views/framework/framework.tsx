@@ -14,7 +14,7 @@ export default function FrameworkView({ config, entries }: FrameworkViewProps) {
             </Link>
             <h1 className="page-title">{config.title}</h1>
             <p className="page-subtitle">
-                {config.title}&rsquo;de hafta hafta ne değişti.
+                {config.locative} hafta hafta ne değişti.
             </p>
 
             {entries.length === 0 ? (
