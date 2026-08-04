@@ -30,6 +30,13 @@ export const REPOS: RepoConfig[] = [
         slug: 'react-native',
         title: 'React Native',
     },
+    {
+        label: 'expo',
+        owner: 'expo',
+        repo: 'expo',
+        slug: 'expo',
+        title: 'Expo',
+    },
 ]
 
 export function findRepo(label: string): RepoConfig | undefined {
