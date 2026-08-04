@@ -86,10 +86,11 @@ RAM to spare.
 The workflow has no `schedule` trigger. GitHub disables scheduled workflows after 60 days
 without a commit and this repository can go quiet for longer than that, so the timer lives
 on the server instead: a Cronicle event (`brief weekly`, Tuesdays 09:00 Europe/Istanbul,
-dashboard at cron.ilkerbalcilar.xyz) runs `/opt/cronicle/scripts/brief-weekly.sh`, which
-hits the workflow-dispatch API with a fine-grained PAT read from the same directory. The
-PAT has `actions: write` on this repository only; the event retries twice and its run
-history shows the failure when the PAT eventually expires.
+dashboard at cron.ilkerbalcilar.xyz) runs an inline shell step that hits the
+workflow-dispatch API. The fine-grained PAT lives encrypted in Cronicle's secret store
+(global scope, exposed to jobs as `BRIEF_GH_TOKEN`) and has `actions: write` on this
+repository only; the event retries twice and its run history shows the failure when the
+PAT eventually expires.
 
 Nothing is committed back to the repository.
 
