@@ -79,9 +79,17 @@ whatever is already in Spaces, and rsyncs `out/` to the box where Caddy serves i
 on every push to `main`, so a code change ships without regenerating a brief. Pull requests
 get the checks and stop there. No container, no app server — just files.
 
-`weekly.yml` runs on the Tuesday cron, publishes that week's JSON to Spaces, and then calls
-`deploy.yml` to render and ship it. The build always happens on a runner, never on the box,
-which has under 300 MB of RAM to spare.
+`weekly.yml` publishes that week's JSON to Spaces and then calls `deploy.yml` to render and
+ship it. The build always happens on a runner, never on the box, which has under 300 MB of
+RAM to spare.
+
+The workflow has no `schedule` trigger. GitHub disables scheduled workflows after 60 days
+without a commit and this repository can go quiet for longer than that, so the timer lives
+on the server instead: a root crontab entry (`0 6 * * 2`, the server runs UTC) executes
+`/root/brief-weekly.sh`, which hits the workflow-dispatch API with a fine-grained PAT read
+from `/root/.brief-github-token` and appends to `/var/log/brief-weekly.log`. The PAT has
+`actions: write` on this repository only; when it expires, the log keeps printing `FAILED`
+until someone mints a new one.
 
 Nothing is committed back to the repository.
 
