@@ -4,6 +4,7 @@ import JsonLd from '@/components/json-ld/json-ld'
 import { REPOS } from '@/lib/constants/repos.constants'
 import {
     SITE_DESCRIPTION,
+    SITE_FRAMEWORKS,
     SITE_NAME,
     SITE_URL,
 } from '@/lib/constants/site.constants'
@@ -16,7 +17,7 @@ export const metadata: Metadata = {
         types: { 'application/rss+xml': '/feed.xml' },
     },
     description: SITE_DESCRIPTION,
-    title: `${SITE_NAME} — React, Next.js ve React Native haftalık özeti`,
+    title: `${SITE_NAME} — ${SITE_FRAMEWORKS} haftalık özeti`,
 }
 
 export default async function HomePage() {
