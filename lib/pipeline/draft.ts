@@ -73,6 +73,15 @@ export async function draft(
         )
     )
 
+    // Same trap as triage: every draftOne failure is swallowed, so a broken
+    // model would publish an empty brief. Picks without items means drafting
+    // broke, not that the week was quiet.
+    if (!items.length && triaged.picks.length) {
+        throw new Error(
+            `drafting failed for all ${triaged.picks.length} picks and produced no items`
+        )
+    }
+
     capCodeBlocks(items)
 
     return items

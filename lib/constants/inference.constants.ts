@@ -28,7 +28,8 @@ export const OUTPUT_LANGUAGE = process.env.BRIEF_LANGUAGE ?? 'Turkish'
 
 export const TRIAGE_MAX_TOKENS = 8_000
 
-export const DRAFT_MAX_TOKENS = 12_000
+// kimi-k2.5 caps non-streaming completions at 9k tokens on DO inference.
+export const DRAFT_MAX_TOKENS = 9_000
 
 export const HIGHLIGHTS_PER_REPO = 6
 
