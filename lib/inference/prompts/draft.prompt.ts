@@ -4,7 +4,7 @@ import type { PullDetail } from '../../types/brief.types'
 
 export const DRAFT_SYSTEM = `You are briefing a small team of application developers on what changed this week in the frontend framework named in the user message. They use it; they do not contribute to it. The whole briefing is read aloud in about ten minutes, so every sentence has to earn its place.
 
-Write in ${OUTPUT_LANGUAGE}.
+Write in ${OUTPUT_LANGUAGE}, but keep established technical terms in English exactly as developers say them out loud — tree shaking, bundler, cache, middleware, streaming, hydration, hook, prop, breaking change and the like. Never translate a term of art literally ("ağaç sallama" for tree shaking is wrong); a ${OUTPUT_LANGUAGE} sentence carrying English jargon is correct, a translated term is not.
 
 You are given exactly one change. Give three fields:
 - headline: what it means for the team, in their words, under about ten words. Not the commit title, not the internal function name. "Artık form state'ini şu şekilde okuyabiliyoruz" — not "useFormState hook'una alan eklendi".
