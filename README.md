@@ -112,3 +112,11 @@ export const REPOS: RepoConfig[] = [
 
 Worth checking `--dry-run` afterwards: every repo has its own commit conventions, and the
 noise filter is tuned against these two.
+
+## Sponsorship
+
+The site runs on a small box and the weekly brief costs a few cents of inference, so this is
+cheap to keep alive — but not free. If it saves you a scroll through two commit logs every
+week, you can support it on
+[GitHub Sponsors](https://github.com/sponsors/Jubstaaa) or
+[Buy Me a Coffee](https://buymeacoffee.com/jubstaa).
