@@ -7,7 +7,7 @@ import {
     REQUEST_TIMEOUT_MS,
 } from '../constants/inference.constants'
 
-export type ReasoningEffort = 'high' | 'low' | 'medium'
+export type ReasoningEffort = 'high' | 'low' | 'medium' | 'none'
 
 export interface UsageTotals {
     calls: number

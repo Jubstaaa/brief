@@ -4,6 +4,7 @@ import { compact } from 'es-toolkit'
 import {
     DRAFT_MAX_TOKENS,
     DRAFT_MODEL,
+    DRAFT_REASONING_EFFORT,
     MAX_CODE_BLOCKS,
 } from '../constants/inference.constants'
 import { findRepo } from '../constants/repos.constants'
@@ -23,6 +24,7 @@ async function draftOne(
         const written = await complete({
             maxTokens: DRAFT_MAX_TOKENS,
             model: DRAFT_MODEL,
+            reasoningEffort: DRAFT_REASONING_EFFORT,
             schema: draftItemSchema,
             system: DRAFT_SYSTEM,
             user: draftUser(pick, detail, framework),

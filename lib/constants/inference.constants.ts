@@ -17,18 +17,20 @@ function usdPerMtok(variable: string): number | undefined {
 export const INFERENCE_BASE_URL =
     process.env.DO_INFERENCE_BASE_URL ?? 'https://inference.do-ai.run/v1'
 
-// DO model access keys are per-model allowlists since 2026-08-11; this key
-// grants llama-4-maverick and kimi-k2.5 only. Cheap+fast model triages, the
-// stronger one drafts.
+// DO model access keys are per-model allowlists since 2026-08-11. Cheap+fast
+// model triages, the stronger one drafts.
 export const TRIAGE_MODEL = process.env.BRIEF_TRIAGE_MODEL ?? 'llama-4-maverick'
 
-export const DRAFT_MODEL = process.env.BRIEF_DRAFT_MODEL ?? 'kimi-k2.5'
+export const DRAFT_MODEL = process.env.BRIEF_DRAFT_MODEL ?? 'kimi-k2.6'
 
 export const OUTPUT_LANGUAGE = process.env.BRIEF_LANGUAGE ?? 'Turkish'
 
 export const TRIAGE_MAX_TOKENS = 8_000
 
-// kimi-k2.5 caps non-streaming completions at 9k tokens on DO inference.
+// kimi-k2.6 reasons by default and will spend the entire budget thinking,
+// returning empty content. Drafting wants prose, not deliberation.
+export const DRAFT_REASONING_EFFORT = 'none' as const
+
 export const DRAFT_MAX_TOKENS = 9_000
 
 export const HIGHLIGHTS_PER_REPO = 6
