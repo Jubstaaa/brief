@@ -1,12 +1,12 @@
 import {
     INDEX_KEY,
-    SPACES_PUBLIC_BASE_URL,
+    STORAGE_PUBLIC_BASE_URL,
     WEEK_KEY_PREFIX,
-} from '../constants/spaces.constants'
+} from '../constants/storage.constants'
 import type { ArchiveEntry, Brief } from '../types/brief.types'
 
 async function fetchJson<T>(key: string): Promise<T | null> {
-    const response = await fetch(`${SPACES_PUBLIC_BASE_URL}/${key}`, {
+    const response = await fetch(`${STORAGE_PUBLIC_BASE_URL}/${key}`, {
         cache: 'force-cache',
     })
 
