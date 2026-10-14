@@ -44,6 +44,13 @@ jobs:
 
             - name: Deploy
               env:
-                  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-                  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-              run: bunx wrangler deploy
+                  SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+                  SSH_HOST: ${{ secrets.DEPLOY_HOST }}
+                  SSH_USER: ${{ secrets.DEPLOY_USER }}
+              run: |
+                  mkdir -p ~/.ssh
+                  printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
+                  chmod 600 ~/.ssh/id_ed25519
+                  ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
+                  rsync -az --delete -e "ssh -i ~/.ssh/id_ed25519" \
+                      out/ "$SSH_USER@$SSH_HOST:/opt/proxy/sites/brief/"
