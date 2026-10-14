@@ -150,6 +150,6 @@ export async function run(window: BriefWindow, dryRun: boolean): Promise<void> {
             (costUsd === undefined ? '' : `, ~$${costUsd.toFixed(4)}`)
     )
     consola.success(
-        `published ${brief.week} to Spaces — run \`bun run build\` to render the site`
+        `published ${brief.week} to storage — run \`bun run build\` to render the site`
     )
 }
