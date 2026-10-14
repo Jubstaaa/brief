@@ -76,13 +76,13 @@ spending a token.
 Two workflows, and only one of them costs anything.
 
 `deploy.yml` is the whole deployment: it checks the code, runs `next build` against
-whatever is already in R2, and rsyncs `out/` to the box where Caddy serves it. It runs
-on every push to `main`, so a code change ships without regenerating a brief. Pull requests
-get the checks and stop there. No container, no app server — just files.
+whatever is already in R2, and ships `out/` with `wrangler deploy` as Workers static
+assets on `brief.ilkerbalcilar.com`. It runs on every push to `main`, so a code change ships
+without regenerating a brief. Pull requests get the checks and stop there. No container, no
+app server — just files, and static asset requests on Workers are free.
 
 `weekly.yml` publishes that week's JSON to R2 and then calls `deploy.yml` to render and
-ship it. The build always happens on a runner, never on the box, which has under 300 MB of
-RAM to spare.
+ship it.
 
 The workflow has no `schedule` trigger. GitHub disables scheduled workflows after 60 days
 without a commit and this repository can go quiet for longer than that, so the timer lives
@@ -96,7 +96,7 @@ PAT eventually expires.
 Nothing is committed back to the repository.
 
 Repository secrets: `DO_INFERENCE_API_KEY`, `STORAGE_KEY`, `STORAGE_SECRET`,
-`STORAGE_ENDPOINT`, `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`. They are not edited here: Infisical (project `brief-site`,
+`STORAGE_ENDPOINT`, `CLOUDFLARE_API_TOKEN`, `CLOUDFLARE_ACCOUNT_ID`. They are not edited here: Infisical (project `brief-site`,
 `prod` environment) is the source of truth and a secret sync pushes changes to this
 repository's Actions secrets automatically.
 
@@ -116,7 +116,7 @@ noise filter is tuned against these two.
 
 ## Sponsorship
 
-The site runs on a small box and the weekly brief costs a few cents of inference, so this is
+Hosting is free on Cloudflare, but the weekly brief costs a few cents of inference, so this is
 cheap to keep alive — but not free. If it saves you a scroll through two commit logs every
 week, you can support it on
 [GitHub Sponsors](https://github.com/sponsors/Jubstaaa) or
