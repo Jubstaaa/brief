@@ -24,12 +24,12 @@ enrich      PR body and changed-file list for the picked pull requests
    ↓
 draft       per change: what it does, and what it means in practice
    ↓
-publish     weeks/<week>.json + index.json → Cloudflare R2
+publish     weeks/<week>.json + index.json → DigitalOcean Spaces
    ↓
 next build  reads the published JSON over HTTPS, static export → out/
 ```
 
-Model output lives as JSON in an R2 bucket, and the pages are generated from it. Changing
+Model output lives as JSON in a Spaces bucket, and the pages are generated from it. Changing
 the design later means re-running `next build`, not paying for inference again.
 
 The split is deliberate: publishing needs write credentials, but the objects are public-read,
@@ -41,7 +41,7 @@ so `next build` fetches them over plain HTTPS with no credentials at all.
 bun install
 
 bun run generate -- --dry-run    # fetch and filter only, no model calls
-bun run generate                 # full run for the current week → publishes to R2
+bun run generate                 # full run for the current week → publishes to Spaces
 bun run generate -- --since=2026-07-20T21:00:00Z --until=2026-07-27T21:00:00Z --week=2026-07-28
 
 bun run dev                      # preview the pages locally
@@ -57,30 +57,29 @@ spending a token.
 
 ## Environment
 
-| Variable                  | Needed for  | Notes                                                 |
-| ------------------------- | ----------- | ----------------------------------------------------- |
-| `DO_INFERENCE_API_KEY`    | model calls | DigitalOcean Gradient model access key                |
-| `DO_INFERENCE_BASE_URL`   | model calls | defaults to `https://inference.do-ai.run/v1`          |
-| `GITHUB_TOKEN`            | GitHub API  | optional locally; without it you get 60 requests/hour |
-| `BRIEF_TRIAGE_MODEL`      | model calls | defaults to `router:software-engineering`             |
-| `BRIEF_DRAFT_MODEL`       | model calls | defaults to `router:writing`                          |
-| `BRIEF_LANGUAGE`          | model calls | output language, defaults to `Turkish`                |
-| `STORAGE_KEY`             | publishing  | R2 access key ID, scoped to the bucket                |
-| `STORAGE_SECRET`          | publishing  | R2 secret access key                                  |
-| `STORAGE_ENDPOINT`        | publishing  | `https://<account-id>.r2.cloudflarestorage.com`       |
-| `STORAGE_BUCKET`          | publishing  | defaults to `brief-weekly`                            |
-| `STORAGE_PUBLIC_BASE_URL` | reading     | defaults to `https://cdn.brief.ilkerbalcilar.com`     |
+| Variable                | Needed for  | Notes                                                 |
+| ----------------------- | ----------- | ----------------------------------------------------- |
+| `DO_INFERENCE_API_KEY`  | model calls | DigitalOcean Gradient model access key                |
+| `DO_INFERENCE_BASE_URL` | model calls | defaults to `https://inference.do-ai.run/v1`          |
+| `GITHUB_TOKEN`          | GitHub API  | optional locally; without it you get 60 requests/hour |
+| `BRIEF_TRIAGE_MODEL`    | model calls | defaults to `router:software-engineering`             |
+| `BRIEF_DRAFT_MODEL`     | model calls | defaults to `router:writing`                          |
+| `BRIEF_LANGUAGE`        | model calls | output language, defaults to `Turkish`                |
+| `SPACES_KEY`            | publishing  | Spaces access key, scoped to the bucket               |
+| `SPACES_SECRET`         | publishing  | Spaces secret key                                     |
+| `SPACES_BUCKET`         | both        | defaults to `brief-weekly`                            |
+| `SPACES_REGION`         | both        | defaults to `fra1`                                    |
 
 ## Deployment
 
 Two workflows, and only one of them costs anything.
 
 `deploy.yml` is the whole deployment: it checks the code, runs `next build` against
-whatever is already in R2, and rsyncs `out/` to the box where Caddy serves it. It runs
+whatever is already in Spaces, and rsyncs `out/` to the box where Caddy serves it. It runs
 on every push to `main`, so a code change ships without regenerating a brief. Pull requests
 get the checks and stop there. No container, no app server — just files.
 
-`weekly.yml` publishes that week's JSON to R2 and then calls `deploy.yml` to render and
+`weekly.yml` publishes that week's JSON to Spaces and then calls `deploy.yml` to render and
 ship it. The build always happens on a runner, never on the box, which has under 300 MB of
 RAM to spare.
 
@@ -95,8 +94,8 @@ PAT eventually expires.
 
 Nothing is committed back to the repository.
 
-Repository secrets: `DO_INFERENCE_API_KEY`, `STORAGE_KEY`, `STORAGE_SECRET`,
-`STORAGE_ENDPOINT`, `DEPLOY_SSH_KEY`, `DEPLOY_HOST`, `DEPLOY_USER`. They are not edited here: Infisical (project `brief-site`,
+Repository secrets: `DO_INFERENCE_API_KEY`, `SPACES_KEY`, `SPACES_SECRET`, `DEPLOY_SSH_KEY`,
+`DEPLOY_HOST`, `DEPLOY_USER`. They are not edited here: Infisical (project `brief-site`,
 `prod` environment) is the source of truth and a secret sync pushes changes to this
 repository's Actions secrets automatically.
 
