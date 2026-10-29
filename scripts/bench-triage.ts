@@ -1,5 +1,6 @@
 import { consola } from 'consola'
 import OpenAI from 'openai'
+import { z } from 'zod'
 
 import {
     INFERENCE_BASE_URL,
@@ -80,11 +81,7 @@ for (const candidate of CANDIDATES) {
             consola.log('='.repeat(72))
 
             if (!parsed.success) {
-                consola.error(
-                    parsed.error.issues
-                        .map(i => `${i.path.join('.')} ${i.message}`)
-                        .join('; ')
-                )
+                consola.error(z.prettifyError(parsed.error))
                 consola.log(content.slice(0, 500))
                 continue
             }

@@ -10,17 +10,14 @@ export const SITE_NAME = 'brief'
 // Turkish list the case suffix sits on the last item and covers the whole
 // enumeration, so the sentence ends with that repo's `locative`.
 const titles = REPOS.map(repo => repo.title)
-const locatives = REPOS.map(repo => repo.locative)
+const listFormat = new Intl.ListFormat('tr', { type: 'conjunction' })
 
-export const SITE_FRAMEWORKS =
-    titles.length === 1
-        ? titles.join('')
-        : `${titles.slice(0, -1).join(', ')} ve ${titles.at(-1)}`
+export const SITE_FRAMEWORKS = listFormat.format(titles)
 
-const framesWithSuffix =
-    locatives.length === 1
-        ? locatives.join('')
-        : `${titles.slice(0, -1).join(', ')} ve ${locatives.at(-1)}`
+const framesWithSuffix = listFormat.format([
+    ...titles.slice(0, -1),
+    REPOS.at(-1)?.locative ?? '',
+])
 
 export const SITE_DESCRIPTION = `${framesWithSuffix} hafta hafta ne değişti.`
 

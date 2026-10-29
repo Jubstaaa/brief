@@ -1,6 +1,7 @@
 import { Command } from 'commander'
 import { consola } from 'consola'
 import OpenAI from 'openai'
+import { z } from 'zod'
 
 import {
     DRAFT_MAX_TOKENS,
@@ -129,9 +130,7 @@ async function callModel(
         const parsed = draftItemSchema.safeParse(extractJson(content))
 
         if (!parsed.success) {
-            base.error = parsed.error.issues
-                .map(issue => `${issue.path.join('.')} ${issue.message}`)
-                .join('; ')
+            base.error = z.prettifyError(parsed.error)
             return base
         }
 

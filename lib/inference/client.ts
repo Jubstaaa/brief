@@ -1,5 +1,5 @@
 import OpenAI from 'openai'
-import type { z } from 'zod'
+import { z } from 'zod'
 
 import {
     INFERENCE_BASE_URL,
@@ -90,10 +90,9 @@ export async function complete<T>(options: {
     const parsed = options.schema.safeParse(extractJson(content))
 
     if (!parsed.success) {
-        const issues = parsed.error.issues
-            .map(issue => `${issue.path.join('.')} ${issue.message}`)
-            .join('; ')
-        throw new Error(`${options.model} schema mismatch: ${issues}`)
+        throw new Error(
+            `${options.model} schema mismatch: ${z.prettifyError(parsed.error)}`
+        )
     }
 
     return parsed.data
