@@ -18,8 +18,9 @@ export const INFERENCE_BASE_URL =
     process.env.DO_INFERENCE_BASE_URL ?? 'https://inference.do-ai.run/v1'
 
 // DO model access keys are per-model allowlists since 2026-08-11. Cheap+fast
-// model triages, the stronger one drafts.
-export const TRIAGE_MODEL = process.env.BRIEF_TRIAGE_MODEL ?? 'llama-4-maverick'
+// model triages, the stronger one drafts. llama-4-maverick was retired in
+// 2026-11; gemma-4-31B-it had won the triage benchmark before it.
+export const TRIAGE_MODEL = process.env.BRIEF_TRIAGE_MODEL ?? 'gemma-4-31B-it'
 
 export const DRAFT_MODEL = process.env.BRIEF_DRAFT_MODEL ?? 'kimi-k2.6'
 
