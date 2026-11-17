@@ -3,6 +3,7 @@ import { consola } from 'consola'
 import {
     TRIAGE_MAX_TOKENS,
     TRIAGE_MODEL,
+    TRIAGE_REASONING_EFFORT,
 } from '../constants/inference.constants'
 import { findRepo } from '../constants/repos.constants'
 import { complete } from '../inference/client'
@@ -20,6 +21,7 @@ async function triageRepo(repo: RepoCommits): Promise<Triage> {
     const result = await complete({
         maxTokens: TRIAGE_MAX_TOKENS,
         model: TRIAGE_MODEL,
+        reasoningEffort: TRIAGE_REASONING_EFFORT,
         schema: repoTriageSchema,
         system: TRIAGE_SYSTEM,
         user: triageUser(repo, framework),

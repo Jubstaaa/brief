@@ -62,8 +62,8 @@ spending a token.
 | `DO_INFERENCE_API_KEY`  | model calls | DigitalOcean Gradient model access key                |
 | `DO_INFERENCE_BASE_URL` | model calls | defaults to `https://inference.do-ai.run/v1`          |
 | `GITHUB_TOKEN`          | GitHub API  | optional locally; without it you get 60 requests/hour |
-| `BRIEF_TRIAGE_MODEL`    | model calls | defaults to `router:software-engineering`             |
-| `BRIEF_DRAFT_MODEL`     | model calls | defaults to `router:writing`                          |
+| `BRIEF_TRIAGE_MODEL`    | model calls | defaults to `glm-5.3-flash`                           |
+| `BRIEF_DRAFT_MODEL`     | model calls | defaults to `kimi-k2.6`                               |
 | `BRIEF_LANGUAGE`        | model calls | output language, defaults to `Turkish`                |
 | `SPACES_KEY`            | publishing  | Spaces access key, scoped to the bucket               |
 | `SPACES_SECRET`         | publishing  | Spaces secret key                                     |
