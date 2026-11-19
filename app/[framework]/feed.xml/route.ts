@@ -1,6 +1,6 @@
-import { findRepoBySlug, REPOS } from '@/lib/constants/repos.constants'
-import { readArchive } from '@/lib/storage/archive'
-import { buildFrameworkFeed } from '@/lib/utils/feed'
+import { readArchive } from '@/lib/archive'
+import { buildFrameworkFeed } from '@/lib/feed'
+import { findRepoBySlug, REPOS } from '@/lib/repos'
 
 export const dynamic = 'force-static'
 

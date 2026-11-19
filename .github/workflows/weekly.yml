@@ -18,7 +18,13 @@ concurrency:
     cancel-in-progress: false
 
 jobs:
+    # The full gate runs before the model calls, which are the only part of the
+    # run that costs money.
+    ci:
+        uses: ./.github/workflows/ci.yml
+
     generate:
+        needs: ci
         runs-on: ubuntu-latest
         permissions:
             contents: read
@@ -30,8 +36,6 @@ jobs:
               with:
                   bun-version-file: package.json
             - run: bun install --frozen-lockfile
-            - run: bun test
-            - run: bun run type-check
 
             - name: Generate
               env:

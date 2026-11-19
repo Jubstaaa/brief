@@ -1,8 +1,8 @@
 import type { MetadataRoute } from 'next'
 
-import { REPOS } from '@/lib/constants/repos.constants'
-import { SITE_URL } from '@/lib/constants/site.constants'
-import { readArchive } from '@/lib/storage/archive'
+import { readArchive } from '@/lib/archive'
+import { REPOS } from '@/lib/repos'
+import { SITE_URL } from '@/lib/site'
 
 export const dynamic = 'force-static'
 

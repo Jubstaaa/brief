@@ -1,15 +1,23 @@
 import type { Metadata } from 'next'
 
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-import JsonLd from '@/components/json-ld/json-ld'
-import { findRepoBySlug } from '@/lib/constants/repos.constants'
-import { SITE_NAME, SITE_URL } from '@/lib/constants/site.constants'
-import { readArchive, readBrief } from '@/lib/storage/archive'
-import type { RepoConfig } from '@/lib/types/brief.types'
-import { OG_SIZE, ogImagePath } from '@/lib/utils/og'
-import { formatRange } from '@/lib/utils/window'
-import WeekView from '@/views/week/week'
+import JsonLd from '@/components/json-ld'
+import { readArchive, readBrief } from '@/lib/archive'
+import type { Release } from '@/lib/brief'
+import { OG_SIZE, ogImagePath } from '@/lib/og'
+import { findRepoBySlug } from '@/lib/repos'
+import type { RepoConfig } from '@/lib/repos'
+import { SITE_NAME, SITE_URL } from '@/lib/site'
+import { formatRange } from '@/lib/window'
+
+import WeekItem from './_components/week-item'
+import WeekReleases from './_components/week-releases'
+
+function releasesFor(releases: Release[], label: string): Release[] {
+    return releases.filter(release => release.label === label)
+}
 
 export interface WeekPageProps {
     params: Promise<{ framework: string; week: string }>
@@ -84,6 +92,8 @@ export default async function WeekPage({ params }: WeekPageProps) {
 
     const { brief, config, items } = loaded
     const range = formatRange(brief.since, brief.until)
+    const scanned =
+        brief.counts.find(count => count.label === config.label)?.total ?? 0
 
     return (
         <>
@@ -103,7 +113,32 @@ export default async function WeekPage({ params }: WeekPageProps) {
                     'url': `${SITE_URL}/${config.slug}/${brief.week}`,
                 }}
             />
-            <WeekView brief={brief} config={config} items={items} />
+            <Link
+                className="text-muted mb-7 inline-block text-sm no-underline"
+                href={`/${config.slug}`}>
+                ← {config.title} haftaları
+            </Link>
+            <h1 className="page-title">
+                {config.title} · {brief.week}
+            </h1>
+            <p className="page-subtitle">
+                {formatRange(brief.since, brief.until)}
+            </p>
+
+            <WeekReleases
+                releases={releasesFor(brief.releases, config.label)}
+            />
+
+            <div className="mt-14">
+                {items.map((item, index) => (
+                    <WeekItem key={item.pr} item={item} ordinal={index + 1} />
+                ))}
+            </div>
+
+            <footer className="page-footer">
+                {scanned} commit tarandı, {items.length} tanesi bizi
+                ilgilendiriyor.
+            </footer>
         </>
     )
 }

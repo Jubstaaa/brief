@@ -9,7 +9,7 @@ import reactPlugin from 'eslint-plugin-react'
 import tseslint from 'typescript-eslint'
 
 export default tseslint.config(
-    { ignores: ['node_modules', '.next', 'out', 'data', 'next-env.d.ts'] },
+    { ignores: ['node_modules', '.next', 'out', 'next-env.d.ts'] },
 
     js.configs.recommended,
     ...nextVitals,
@@ -150,7 +150,7 @@ export default tseslint.config(
     },
 
     {
-        files: ['lib/pipeline/**', 'scripts/**'],
+        files: ['pipeline/**', 'scripts/**'],
         rules: { 'no-console': 'off' },
     },
 
