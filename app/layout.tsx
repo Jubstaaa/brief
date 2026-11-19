@@ -16,15 +16,16 @@ import './globals.css'
 
 // A static export has no server to mint nonces, and Next inlines its bootstrap
 // scripts, so scripts and styles need 'unsafe-inline'. The policy still pins
-// every fetch, image, font and script source to this origin. Headers that a meta
+// every fetch, image, font and script source to this origin, plus the Web
+// Analytics beacon Cloudflare injects at the edge. Headers that a meta
 // tag cannot carry (HSTS, frame-ancestors, nosniff) belong to the proxy.
 const CONTENT_SECURITY_POLICY = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline'",
+    "script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com",
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data:",
     "font-src 'self'",
-    "connect-src 'self'",
+    "connect-src 'self' https://cloudflareinsights.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",
