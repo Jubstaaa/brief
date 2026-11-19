@@ -19,6 +19,10 @@ updates:
               patterns: ['tailwindcss', '@tailwindcss/*']
           eslint:
               patterns: ['eslint', '@eslint/*']
+      ignore:
+          # typescript-eslint does not support TypeScript 7 yet.
+          - dependency-name: typescript
+            versions: ['>=7']
     - package-ecosystem: github-actions
       directory: /
       schedule:
