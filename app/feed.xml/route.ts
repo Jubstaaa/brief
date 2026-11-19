@@ -1,5 +1,5 @@
-import { readArchive } from '@/lib/storage/archive'
-import { buildSiteFeed } from '@/lib/utils/feed'
+import { readArchive } from '@/lib/archive'
+import { buildSiteFeed } from '@/lib/feed'
 
 export const dynamic = 'force-static'
 

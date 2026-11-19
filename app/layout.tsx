@@ -10,7 +10,7 @@ import {
     SITE_NAME,
     SITE_REPO_URL,
     SITE_URL,
-} from '@/lib/constants/site.constants'
+} from '@/lib/site'
 
 import './globals.css'
 

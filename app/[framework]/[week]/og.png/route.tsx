@@ -1,10 +1,10 @@
 import { ImageResponse } from 'next/og'
 
-import { findRepoBySlug } from '@/lib/constants/repos.constants'
-import { SITE_NAME } from '@/lib/constants/site.constants'
-import { readArchive, readBrief } from '@/lib/storage/archive'
-import { OG_SIZE } from '@/lib/utils/og'
-import { formatRange } from '@/lib/utils/window'
+import { readArchive, readBrief } from '@/lib/archive'
+import { OG_SIZE } from '@/lib/og'
+import { findRepoBySlug } from '@/lib/repos'
+import { SITE_NAME } from '@/lib/site'
+import { formatRange } from '@/lib/window'
 
 export const dynamic = 'force-static'
 

@@ -1,8 +1,8 @@
 # brief
 
-A weekly digest of what changed in React and Next.js — [brief.ilkerbalcilar.com](https://brief.ilkerbalcilar.com)
+A weekly digest of what changed in React, Next.js, React Native and Expo — [brief.ilkerbalcilar.com](https://brief.ilkerbalcilar.com)
 
-I wanted to keep up with these two repos without scrolling GitHub every few days, and
+I wanted to keep up with these repos without scrolling GitHub every few days, and
 release notes were not enough: React ships releases rarely, so a release-driven digest says
 "nothing new" for weeks while dozens of meaningful commits land. This reads the commit
 history instead.
@@ -74,13 +74,15 @@ spending a token.
 
 Two workflows, and only one of them costs anything.
 
-`deploy.yml` is the whole deployment: it checks the code, runs `next build` against
-whatever is already in Spaces, and rsyncs `out/` to the box where Caddy serves it. It runs
+`deploy.yml` is the whole deployment: it runs the `ci.yml` gate, runs `next build` against
+whatever is already in Spaces, and ships `out/` to the box where Caddy serves it through
+`Jubstaaa/deploy-actions/static` (an atomic switch that rolls back if the site stops
+answering). It runs
 on every push to `main`, so a code change ships without regenerating a brief. Pull requests
 get the checks and stop there. No container, no app server — just files.
 
-`weekly.yml` publishes that week's JSON to Spaces and then calls `deploy.yml` to render and
-ship it. The build always happens on a runner, never on the box, which has under 300 MB of
+`weekly.yml` runs the same gate, publishes that week's JSON to Spaces and then calls
+`deploy.yml` to render and ship it. The build always happens on a runner, never on the box, which has under 300 MB of
 RAM to spare.
 
 The workflow has no `schedule` trigger. GitHub disables scheduled workflows after 60 days
@@ -95,28 +97,43 @@ PAT eventually expires.
 Nothing is committed back to the repository.
 
 Repository secrets: `DO_INFERENCE_API_KEY`, `SPACES_KEY`, `SPACES_SECRET`, `DEPLOY_SSH_KEY`,
-`DEPLOY_HOST`, `DEPLOY_USER`. They are not edited here: Infisical (project `brief-site`,
+`DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_KNOWN_HOSTS`. They are not edited here: Infisical (project `brief-site`,
 `prod` environment) is the source of truth and a secret sync pushes changes to this
 repository's Actions secrets automatically.
 
+## Layout
+
+```
+app/        routes (Next.js App Router); week-page parts live in app/[framework]/[week]/_components
+components/ the JSON-LD tag, shared by every route
+lib/        what the site imports: archive reads, feeds, URLs, repos, week windows
+pipeline/   build-time generation: GitHub, model calls, schemas, publishing (needs secrets)
+scripts/    the generate CLI
+```
+
 ## Adding a repo
 
-One entry in `lib/constants/repos.constants.ts`:
+One entry in `REPOS` in `lib/repos.ts`:
 
 ```ts
-export const REPOS: RepoConfig[] = [
-    { owner: 'facebook', repo: 'react', label: 'react' },
-    { owner: 'vercel', repo: 'next.js', label: 'next.js' },
-]
+{
+    label: 'expo',          // matches the `repo` field the model writes
+    locative: "Expo'da",    // title with its Turkish -de/-da suffix
+    owner: 'expo',
+    repo: 'expo',
+    slug: 'expo',           // URL segment
+    title: 'Expo',
+    noise: [/^some repo-specific noise/i], // optional
+},
 ```
 
 Worth checking `--dry-run` afterwards: every repo has its own commit conventions, and the
-noise filter is tuned against these two.
+noise filter in `pipeline/filter.ts` is tuned against the current ones.
 
 ## Sponsorship
 
 The site runs on a small box and the weekly brief costs a few cents of inference, so this is
-cheap to keep alive — but not free. If it saves you a scroll through two commit logs every
+cheap to keep alive — but not free. If it saves you a scroll through four commit logs every
 week, you can support it on
 [GitHub Sponsors](https://github.com/sponsors/Jubstaaa) or
 [Buy Me a Coffee](https://buymeacoffee.com/jubstaa).

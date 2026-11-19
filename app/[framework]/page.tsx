@@ -1,12 +1,13 @@
 import type { Metadata } from 'next'
 
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
-import JsonLd from '@/components/json-ld/json-ld'
-import { findRepoBySlug, REPOS } from '@/lib/constants/repos.constants'
-import { SITE_NAME, SITE_URL } from '@/lib/constants/site.constants'
-import { readArchive } from '@/lib/storage/archive'
-import FrameworkView from '@/views/framework/framework'
+import JsonLd from '@/components/json-ld'
+import { readArchive } from '@/lib/archive'
+import { findRepoBySlug, REPOS } from '@/lib/repos'
+import { SITE_NAME, SITE_URL } from '@/lib/site'
+import { formatRange } from '@/lib/window'
 
 export interface FrameworkPageProps {
     params: Promise<{ framework: string }>
@@ -63,7 +64,48 @@ export default async function FrameworkPage({ params }: FrameworkPageProps) {
                     'url': `${SITE_URL}/${config.slug}`,
                 }}
             />
-            <FrameworkView config={config} entries={entries} />
+            <Link
+                className="text-muted mb-7 inline-block text-sm no-underline"
+                href="/">
+                ← tüm kategoriler
+            </Link>
+            <h1 className="page-title">{config.title}</h1>
+            <p className="page-subtitle">
+                {config.locative} hafta hafta ne değişti.
+            </p>
+
+            {entries.length === 0 ? (
+                <div className="callout">Henüz hafta yok.</div>
+            ) : (
+                <>
+                    <h2 className="section-heading">Haftalar</h2>
+                    <ul className="m-0 list-none p-0">
+                        {entries.map(entry => (
+                            <li
+                                key={entry.week}
+                                className="border-line border-b">
+                                <Link
+                                    className="text-ink hover:text-accent flex flex-col items-baseline gap-1 px-0.5 py-4 no-underline sm:flex-row sm:justify-between sm:gap-4"
+                                    href={`/${config.slug}/${entry.week}`}>
+                                    <span>
+                                        {formatRange(entry.since, entry.until)}
+                                    </span>
+                                    <small className="text-muted text-sm whitespace-nowrap">
+                                        {entry.frameworks.find(
+                                            item => item.slug === config.slug
+                                        )?.itemCount ?? 0}{' '}
+                                        madde
+                                    </small>
+                                </Link>
+                            </li>
+                        ))}
+                    </ul>
+                </>
+            )}
+
+            <footer className="page-footer">
+                Her Salı GitHub commit geçmişinden yeniden üretilir.
+            </footer>
         </>
     )
 }

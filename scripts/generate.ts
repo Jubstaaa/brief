@@ -1,13 +1,13 @@
 import { Command } from 'commander'
 import { consola } from 'consola'
 
-import { run } from '../lib/pipeline/run'
-import { resolveWindow } from '../lib/utils/window'
+import { resolveWindow } from '@/lib/window'
+import { run } from '@/pipeline/run'
 
 new Command()
     .name('generate')
     .description(
-        'Fetch a week of React and Next.js commits and write data/<week>.json'
+        'Fetch a week of commits, write the brief and publish it to Spaces'
     )
     .option('--dry-run', 'fetch and filter only, no inference calls', false)
     .option('--since <iso>', 'override the start of the window')
