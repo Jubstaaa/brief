@@ -8,11 +8,11 @@ import { readArchive } from '@/lib/archive'
 import type { ArchiveEntry } from '@/lib/brief'
 import { REPOS } from '@/lib/repos'
 import {
+    pageUrl,
     SITE_DESCRIPTION,
     SITE_FRAMEWORKS,
     SITE_LOGO_PATH,
     SITE_NAME,
-    SITE_URL,
 } from '@/lib/site'
 import { formatRange } from '@/lib/window'
 
@@ -50,11 +50,11 @@ export default async function HomePage() {
                     'hasPart': REPOS.map(config => ({
                         '@type': 'CollectionPage',
                         'name': config.title,
-                        'url': `${SITE_URL}/${config.slug}`,
+                        'url': pageUrl(config.slug),
                     })),
                     'inLanguage': 'tr',
                     'name': SITE_NAME,
-                    'url': SITE_URL,
+                    'url': pageUrl(),
                 }}
             />
             <h1 className="page-title flex items-center gap-3">

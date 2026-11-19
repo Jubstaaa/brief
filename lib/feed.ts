@@ -3,7 +3,7 @@ import { Feed } from 'feed'
 import type { ArchiveEntry } from './brief'
 import { findRepoBySlug } from './repos'
 import type { RepoConfig } from './repos'
-import { SITE_DESCRIPTION, SITE_NAME, SITE_URL } from './site'
+import { pageUrl, SITE_DESCRIPTION, SITE_NAME } from './site'
 import { formatRange } from './window'
 
 function itemCount(entry: ArchiveEntry, slug: string): number {
@@ -14,12 +14,12 @@ export function buildFrameworkFeed(
     config: RepoConfig,
     entries: ArchiveEntry[]
 ): string {
-    const home = `${SITE_URL}/${config.slug}`
+    const home = pageUrl(config.slug)
 
     const feed = new Feed({
         copyright: SITE_NAME,
         description: `${config.locative} hafta hafta ne değişti.`,
-        feedLinks: { rss: `${home}/feed.xml` },
+        feedLinks: { rss: `${home}feed.xml` },
         id: home,
         language: 'tr',
         link: home,
@@ -27,7 +27,7 @@ export function buildFrameworkFeed(
     })
 
     for (const entry of entries) {
-        const url = `${home}/${entry.week}`
+        const url = pageUrl(config.slug, entry.week)
 
         feed.addItem({
             date: new Date(entry.until),
@@ -47,10 +47,10 @@ export function buildSiteFeed(entries: ArchiveEntry[]): string {
     const feed = new Feed({
         copyright: SITE_NAME,
         description: SITE_DESCRIPTION,
-        feedLinks: { rss: `${SITE_URL}/feed.xml` },
-        id: SITE_URL,
+        feedLinks: { rss: `${pageUrl()}feed.xml` },
+        id: pageUrl(),
         language: 'tr',
-        link: SITE_URL,
+        link: pageUrl(),
         title: SITE_NAME,
     })
 
@@ -65,7 +65,7 @@ export function buildSiteFeed(entries: ArchiveEntry[]): string {
 
         if (!config) continue
 
-        const url = `${SITE_URL}/${config.slug}/${entry.week}`
+        const url = pageUrl(config.slug, entry.week)
 
         feed.addItem({
             category: [{ name: config.title }],

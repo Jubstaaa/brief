@@ -6,7 +6,7 @@ import { notFound } from 'next/navigation'
 import JsonLd from '@/components/json-ld'
 import { readArchive } from '@/lib/archive'
 import { findRepoBySlug, REPOS } from '@/lib/repos'
-import { SITE_NAME, SITE_URL } from '@/lib/site'
+import { pageUrl, SITE_NAME } from '@/lib/site'
 import { formatRange } from '@/lib/window'
 
 export interface FrameworkPageProps {
@@ -59,9 +59,9 @@ export default async function FrameworkPage({ params }: FrameworkPageProps) {
                     '@type': 'CollectionPage',
                     'description': describe(config.title),
                     'inLanguage': 'tr',
-                    'isPartOf': { '@type': 'WebSite', 'url': SITE_URL },
+                    'isPartOf': { '@type': 'WebSite', 'url': pageUrl() },
                     'name': `${config.title} haftalık özet`,
-                    'url': `${SITE_URL}/${config.slug}`,
+                    'url': pageUrl(config.slug),
                 }}
             />
             <Link

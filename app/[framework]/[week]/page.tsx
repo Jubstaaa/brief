@@ -9,7 +9,7 @@ import type { Release } from '@/lib/brief'
 import { OG_SIZE, ogImagePath } from '@/lib/og'
 import { findRepoBySlug } from '@/lib/repos'
 import type { RepoConfig } from '@/lib/repos'
-import { SITE_NAME, SITE_URL } from '@/lib/site'
+import { pageUrl, SITE_NAME } from '@/lib/site'
 import { formatRange } from '@/lib/window'
 
 import WeekItem from './_components/week-item'
@@ -108,9 +108,9 @@ export default async function WeekPage({ params }: WeekPageProps) {
                     'inLanguage': 'tr',
                     'isPartOf': {
                         '@type': 'CollectionPage',
-                        'url': `${SITE_URL}/${config.slug}`,
+                        'url': pageUrl(config.slug),
                     },
-                    'url': `${SITE_URL}/${config.slug}/${brief.week}`,
+                    'url': pageUrl(config.slug, brief.week),
                 }}
             />
             <Link

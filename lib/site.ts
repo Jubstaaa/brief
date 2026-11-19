@@ -4,6 +4,15 @@ export const SITE_URL = (
     process.env.BRIEF_SITE_URL ?? 'https://brief.ilkerbalcilar.com'
 ).replace(/\/$/, '')
 
+// next.config sets trailingSlash, so canonicals end in '/'. Every absolute
+// URL the site prints (sitemap, feeds, JSON-LD) goes through here to match.
+export function pageUrl(...segments: string[]): string {
+    return new URL(
+        segments.map(segment => `${encodeURIComponent(segment)}/`).join(''),
+        `${SITE_URL}/`
+    ).href
+}
+
 export const SITE_NAME = 'brief'
 
 // Derived from REPOS so adding a framework never leaves the copy behind. In a

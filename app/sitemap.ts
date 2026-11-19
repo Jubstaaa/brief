@@ -2,7 +2,7 @@ import type { MetadataRoute } from 'next'
 
 import { readArchive } from '@/lib/archive'
 import { REPOS } from '@/lib/repos'
-import { SITE_URL } from '@/lib/site'
+import { pageUrl } from '@/lib/site'
 
 export const dynamic = 'force-static'
 
@@ -14,7 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         entry.frameworks.map(framework => ({
             lastModified: entry.until,
             priority: 0.8,
-            url: `${SITE_URL}/${framework.slug}/${entry.week}`,
+            url: pageUrl(framework.slug, entry.week),
         }))
     )
 
@@ -25,11 +25,11 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ).map(config => ({
         lastModified: newest,
         priority: 0.9,
-        url: `${SITE_URL}/${config.slug}`,
+        url: pageUrl(config.slug),
     }))
 
     return [
-        { lastModified: newest, priority: 1, url: SITE_URL },
+        { lastModified: newest, priority: 1, url: pageUrl() },
         ...archives,
         ...weeks,
     ]
