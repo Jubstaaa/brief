@@ -11,6 +11,14 @@ updates:
       groups:
           next:
               patterns: [next, '@next/*', eslint-config-next]
+          # react and react-dom refuse to run at different versions.
+          react:
+              patterns:
+                  ['react', 'react-dom', '@types/react', '@types/react-dom']
+          tailwind:
+              patterns: ['tailwindcss', '@tailwindcss/*']
+          eslint:
+              patterns: ['eslint', '@eslint/*']
     - package-ecosystem: github-actions
       directory: /
       schedule:
