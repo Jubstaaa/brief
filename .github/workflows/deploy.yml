@@ -31,7 +31,7 @@ jobs:
                   bun-version-file: package.json
             - run: bun install --frozen-lockfile
             - run: bun run build
-            - uses: Jubstaaa/deploy-actions/ssh@49eae2ffd4e60ca7b69323f622d7f06e97bbe1b2 # v1.2.0
+            - uses: Jubstaaa/deploy-actions/ssh@1d9b582d7547aa6f02352b655c0721dd5a88071f # v1.3.0
               with:
                   host: ${{ secrets.DEPLOY_HOST }}
                   user: ${{ secrets.DEPLOY_USER }}
@@ -39,7 +39,7 @@ jobs:
                   known-hosts: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
             # Atomic release: the site switches to the new build in one rename, and
             # goes back to the previous one if it does not answer.
-            - uses: Jubstaaa/deploy-actions/static@49eae2ffd4e60ca7b69323f622d7f06e97bbe1b2 # v1.2.0
+            - uses: Jubstaaa/deploy-actions/static@1d9b582d7547aa6f02352b655c0721dd5a88071f # v1.3.0
               with:
                   source-dir: out
                   site: brief
