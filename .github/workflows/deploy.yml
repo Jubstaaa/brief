@@ -1,56 +1,46 @@
-name: CI / Deploy
+name: Deploy
 
 on:
     push:
         branches: [main]
-    pull_request:
-        branches: [main]
     workflow_dispatch:
     workflow_call:
 
+permissions:
+    contents: read
+
+# Never cancel a release halfway through the upload.
 concurrency:
-    group: deploy-${{ github.ref }}
+    group: deploy-brief
     cancel-in-progress: false
 
 jobs:
-    check:
-        runs-on: ubuntu-latest
-        steps:
-            - uses: actions/checkout@v7
-            - uses: oven-sh/setup-bun@v2
-              with:
-                  bun-version: latest
-            - run: bun install --frozen-lockfile
-            - run: bun test
-            - run: bun run type-check
-            - run: bun run lint
-            - run: bun run format:check
+    ci:
+        uses: ./.github/workflows/ci.yml
 
     deploy:
-        needs: check
-        if: github.ref == 'refs/heads/main'
+        needs: ci
         runs-on: ubuntu-latest
-        permissions:
-            contents: read
+        timeout-minutes: 15
         steps:
-            - uses: actions/checkout@v7
-            - uses: oven-sh/setup-bun@v2
+            - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
               with:
-                  bun-version: latest
+                  persist-credentials: false
+            - uses: oven-sh/setup-bun@0c5077e51419868618aeaa5fe8019c62421857d6 # v2.2.0
+              with:
+                  bun-version-file: package.json
             - run: bun install --frozen-lockfile
-
-            - name: Build
-              run: bun run build
-
-            - name: Deploy
-              env:
-                  SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-                  SSH_HOST: ${{ secrets.DEPLOY_HOST }}
-                  SSH_USER: ${{ secrets.DEPLOY_USER }}
-              run: |
-                  mkdir -p ~/.ssh
-                  printf '%s\n' "$SSH_KEY" > ~/.ssh/id_ed25519
-                  chmod 600 ~/.ssh/id_ed25519
-                  ssh-keyscan -H "$SSH_HOST" >> ~/.ssh/known_hosts 2>/dev/null
-                  rsync -az --delete -e "ssh -i ~/.ssh/id_ed25519" \
-                      out/ "$SSH_USER@$SSH_HOST:/opt/proxy/sites/brief/"
+            - run: bun run build
+            - uses: Jubstaaa/deploy-actions/ssh@49eae2ffd4e60ca7b69323f622d7f06e97bbe1b2 # v1.2.0
+              with:
+                  host: ${{ secrets.DEPLOY_HOST }}
+                  user: ${{ secrets.DEPLOY_USER }}
+                  key: ${{ secrets.DEPLOY_SSH_KEY }}
+                  known-hosts: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
+            # Atomic release: the site switches to the new build in one rename, and
+            # goes back to the previous one if it does not answer.
+            - uses: Jubstaaa/deploy-actions/static@49eae2ffd4e60ca7b69323f622d7f06e97bbe1b2 # v1.2.0
+              with:
+                  source-dir: out
+                  site: brief
+                  health-url: https://brief.ilkerbalcilar.com/
