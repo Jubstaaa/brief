@@ -27,9 +27,9 @@ export default function WeekItem({ item, ordinal }: WeekItemProps) {
                 </span>
             </div>
 
-            <h3 className="mb-5 text-2xl leading-tight font-medium tracking-tight sm:text-3xl">
+            <h2 className="mb-5 text-2xl leading-tight font-medium tracking-tight sm:text-3xl">
                 {item.headline}
-            </h3>
+            </h2>
 
             <Prose content={item.detail} />
 
