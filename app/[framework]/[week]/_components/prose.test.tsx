@@ -20,13 +20,12 @@ describe('Prose', () => {
     ])('drops the target of a %s link written by the model', (_, content) => {
         const html = renderToStaticMarkup(<Prose content={content} />)
 
-        expect(html).not.toContain('evil.test')
-        expect(html).not.toContain('javascript:')
+        expect(html).not.toMatch(/(href|src)=/)
     })
 
     test('drops relative links, which mean nothing on this site', () => {
         expect(
             renderToStaticMarkup(<Prose content="[guide](/docs)" />)
-        ).not.toContain('href="/docs"')
+        ).not.toMatch(/href=/)
     })
 })

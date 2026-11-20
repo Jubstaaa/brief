@@ -19,7 +19,7 @@ import * as publish from './publish'
 import { run } from './run'
 import * as triage from './triage'
 
-const window = {
+const briefWindow = {
     since: '2026-11-10T06:00:00.000Z',
     until: '2026-11-17T06:00:00.000Z',
     week: '2026-11-17',
@@ -57,7 +57,7 @@ afterEach(() => {
 
 describe('run', () => {
     test('a dry run fetches commits only and publishes nothing', async () => {
-        await run(window, true)
+        await run(briefWindow, true)
 
         expect(commits.fetchCommits).toHaveBeenCalledTimes(REPOS.length)
         expect(releases.fetchReleases).not.toHaveBeenCalled()
@@ -66,7 +66,7 @@ describe('run', () => {
     })
 
     test('publishes a quiet week that the site accepts when nothing is picked', async () => {
-        await run(window, false)
+        await run(briefWindow, false)
 
         expect(published).toHaveLength(1)
         const [brief] = published
@@ -78,6 +78,6 @@ describe('run', () => {
     test('lets a publish failure fail the run', async () => {
         spyOn(publish, 'publishBrief').mockRejectedValue(new Error('denied'))
 
-        await expect(run(window, false)).rejects.toThrow('denied')
+        await expect(run(briefWindow, false)).rejects.toThrow('denied')
     })
 })

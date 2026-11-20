@@ -51,10 +51,17 @@ const brief = {
     week: '2026-11-17',
 }
 
-function respondWith(body: unknown, status = 200) {
-    return spyOn(globalThis, 'fetch').mockResolvedValue(
-        new Response(JSON.stringify(body), { status })
+function respondWithText(text: string, status = 200) {
+    // A Response body can be read once, so every call gets a fresh one.
+    const fake = async () => new Response(text, { status })
+
+    return spyOn(globalThis, 'fetch').mockImplementation(
+        Object.assign(fake, { preconnect: fetch.preconnect })
     )
+}
+
+function respondWith(body: unknown, status = 200) {
+    return respondWithText(JSON.stringify(body), status)
 }
 
 afterEach(() => {
@@ -81,7 +88,7 @@ describe('readArchive', () => {
     })
 
     test('names the key when the index is not valid JSON', async () => {
-        spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{"week":'))
+        respondWithText('{"week":')
 
         await expect(readArchive()).rejects.toThrow('index.json: invalid JSON')
     })

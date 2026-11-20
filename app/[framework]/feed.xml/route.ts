@@ -4,6 +4,9 @@ import { findRepoBySlug, REPOS } from '@/lib/repos'
 
 export const dynamic = 'force-static'
 
+// Only the configured frameworks exist; anything else is a 404, in dev too.
+export const dynamicParams = false
+
 export function generateStaticParams() {
     return REPOS.map(config => ({ framework: config.slug }))
 }

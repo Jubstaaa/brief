@@ -130,8 +130,14 @@ describe('windowFromOptions', () => {
 
     test('rejects a window just over 14 days long', () => {
         expect(() =>
-            windowFromOptions({ since: '2026-07-14T05:00:00Z' }, now)
+            windowFromOptions({ since: '2026-07-14T05:59:00Z' }, now)
         ).toThrow('longer than 14 days')
+    })
+
+    test('accepts a window of exactly 14 days', () => {
+        expect(
+            windowFromOptions({ since: '2026-07-14T06:00:00Z' }, now).since
+        ).toBe('2026-07-14T06:00:00.000Z')
     })
 
     test('rejects a window that ends in the future', () => {

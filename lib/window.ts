@@ -1,8 +1,9 @@
 import { TZDate } from '@date-fns/tz'
 import {
+    addDays,
     addHours,
-    differenceInHours,
     format,
+    isAfter,
     isTuesday,
     previousTuesday,
     startOfDay,
@@ -87,10 +88,7 @@ export function windowFromOptions(
         throw new Error(`since must be before until (${since} >= ${until})`)
     }
 
-    if (
-        differenceInHours(new Date(until), new Date(since)) >
-        MAX_WINDOW_DAYS * 24
-    ) {
+    if (isAfter(new Date(until), addDays(new Date(since), MAX_WINDOW_DAYS))) {
         throw new Error(
             `the window is longer than ${MAX_WINDOW_DAYS} days (${since} -> ${until})`
         )
