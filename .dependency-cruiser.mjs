@@ -39,9 +39,9 @@ const config = {
         },
         {
             comment:
-                'lib/ is shared with the site; the pipeline depends on lib, never the reverse.',
-            from: { path: '^lib/' },
-            name: 'lib-does-not-import-pipeline',
+                'The site never reaches the content pipeline (model, GitHub and bucket clients); the pipeline depends on lib, never the reverse.',
+            from: { path: '^(app|components|lib)/' },
+            name: 'site-does-not-import-pipeline',
             severity: 'error',
             to: { path: '^pipeline/' },
         },
