@@ -11,21 +11,29 @@ export const BRIEF_KINDS = [
 export type BriefKind = (typeof BRIEF_KINDS)[number]
 
 // The archive lives in a public bucket and its links end up in href
-// attributes, so only https links are accepted.
-const httpsUrl = z.url({ protocol: /^https$/ })
+// attributes. Every stored link comes from the GitHub API, so anything else
+// means the bucket was tampered with.
+const githubUrl = z.url({ hostname: /^github\.com$/, protocol: /^https$/ })
+
+// The language is spliced into a Markdown code fence; a newline or backtick
+// would end the fence early.
+const codeLangSchema = z.string().regex(/^[\w#+.-]{1,20}$/)
+
+// Slugs become route segments of the static export.
+const slugSchema = z.string().regex(/^[a-z0-9-]+$/)
 
 const releaseSchema = z.object({
     label: z.string(),
     publishedAt: z.iso.datetime(),
     tag: z.string(),
-    url: httpsUrl,
+    url: githubUrl,
 })
 
 export type Release = z.infer<typeof releaseSchema>
 
 const briefItemSchema = z.object({
     action: z.string(),
-    code: z.object({ lang: z.string(), snippet: z.string() }).nullable(),
+    code: z.object({ lang: codeLangSchema, snippet: z.string() }).nullable(),
     detail: z.string(),
     headline: z.string(),
     kind: z.enum(BRIEF_KINDS),
@@ -46,7 +54,7 @@ export type BriefUsage = z.infer<typeof briefUsageSchema>
 
 export const briefSchema = z.object({
     commits: z.array(
-        z.object({ repo: z.string(), title: z.string(), url: httpsUrl })
+        z.object({ repo: z.string(), title: z.string(), url: githubUrl })
     ),
     counts: z.array(
         z.object({
@@ -70,7 +78,7 @@ export type Brief = z.infer<typeof briefSchema>
 
 const archiveFrameworkSchema = z.object({
     itemCount: z.number().int().nonnegative(),
-    slug: z.string(),
+    slug: slugSchema,
 })
 
 export type ArchiveFramework = z.infer<typeof archiveFrameworkSchema>

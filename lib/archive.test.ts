@@ -87,6 +87,14 @@ describe('readArchive', () => {
     })
 })
 
+test('rejects a framework slug that is not a plain path segment', async () => {
+    respondWith([
+        { ...entry, frameworks: [{ itemCount: 1, slug: '../admin' }] },
+    ])
+
+    await expect(readArchive()).rejects.toThrow('slug')
+})
+
 describe('readBrief', () => {
     test('returns the parsed week', async () => {
         respondWith(brief)
@@ -109,6 +117,31 @@ describe('readBrief', () => {
         })
 
         await expect(readBrief('2026-11-17')).rejects.toThrow('url')
+    })
+
+    test('rejects a release link that does not point at GitHub', async () => {
+        respondWith({
+            ...brief,
+            releases: [
+                { ...brief.releases[0], url: 'https://github.com@evil.test/x' },
+            ],
+        })
+
+        await expect(readBrief('2026-11-17')).rejects.toThrow('url')
+    })
+
+    test('rejects a code language that would break out of the code fence', async () => {
+        respondWith({
+            ...brief,
+            items: [
+                {
+                    ...brief.items[0],
+                    code: { lang: 'ts\n# injected', snippet: 'x' },
+                },
+            ],
+        })
+
+        await expect(readBrief('2026-11-17')).rejects.toThrow('lang')
     })
 
     test('rejects an unknown item kind', async () => {

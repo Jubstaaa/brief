@@ -1,4 +1,4 @@
-import Markdown from 'react-markdown'
+import Markdown, { defaultUrlTransform } from 'react-markdown'
 
 import rehypeHighlight from 'rehype-highlight'
 import remarkGfm from 'remark-gfm'
@@ -16,6 +16,14 @@ const PROSE_BASE = [
 
 const PROSE_MUTED_CLASS = `${PROSE_BASE} prose-p:text-muted prose-p:text-sm`
 
+// The text is written by a model from upstream pull requests and published
+// without review, so a link it writes must at least be https.
+function httpsOnly(url: string): string {
+    const safe = defaultUrlTransform(url)
+
+    return safe.startsWith('https://') ? safe : ''
+}
+
 export interface ProseProps {
     content: string
     muted?: boolean
@@ -26,7 +34,8 @@ export default function Prose({ content, muted = false }: ProseProps) {
         <div className={muted ? PROSE_MUTED_CLASS : PROSE_BASE}>
             <Markdown
                 rehypePlugins={[rehypeHighlight]}
-                remarkPlugins={[remarkGfm]}>
+                remarkPlugins={[remarkGfm]}
+                urlTransform={httpsOnly}>
                 {content}
             </Markdown>
         </div>
