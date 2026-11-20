@@ -103,3 +103,19 @@ export function parseStored<T extends z.ZodType>(
 
     return result.data
 }
+
+export function parseStoredJson<T extends z.ZodType>(
+    schema: T,
+    key: string,
+    text: string
+): z.infer<T> {
+    let value: unknown
+
+    try {
+        value = JSON.parse(text)
+    } catch (error) {
+        throw new Error(`${key}: invalid JSON`, { cause: error })
+    }
+
+    return parseStored(schema, key, value)
+}

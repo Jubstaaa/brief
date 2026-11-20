@@ -77,7 +77,13 @@ describe('readArchive', () => {
     test('rejects an index entry that does not match the schema', async () => {
         respondWith([{ ...entry, week: 'last week' }])
 
-        await expect(readArchive()).rejects.toThrow('index.json')
+        await expect(readArchive()).rejects.toThrow(/index\.json: .*week/s)
+    })
+
+    test('names the key when the index is not valid JSON', async () => {
+        spyOn(globalThis, 'fetch').mockResolvedValue(new Response('{"week":'))
+
+        await expect(readArchive()).rejects.toThrow('index.json: invalid JSON')
     })
 })
 

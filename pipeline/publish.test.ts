@@ -40,6 +40,10 @@ function week(label: string): Brief {
 }
 
 const bucket = new Map<string, string>()
+const savedEnv = {
+    SPACES_KEY: process.env.SPACES_KEY,
+    SPACES_SECRET: process.env.SPACES_SECRET,
+}
 
 beforeEach(() => {
     bucket.clear()
@@ -66,6 +70,10 @@ beforeEach(() => {
 
 afterEach(() => {
     mock.restore()
+    for (const [name, value] of Object.entries(savedEnv)) {
+        if (value === undefined) delete process.env[name]
+        else process.env[name] = value
+    }
 })
 
 describe('publishBrief', () => {
@@ -92,6 +100,32 @@ describe('publishBrief', () => {
         await expect(publishBrief(week('2026-11-17'))).rejects.toThrow(
             'weeks/2026-11-10.json'
         )
+        expect(bucket.has('weeks/2026-11-17.json')).toBe(false)
         expect(bucket.has('index.json')).toBe(false)
+    })
+
+    test('refuses to publish a brief the site would reject', async () => {
+        const brief = week('2026-11-17')
+        brief.releases = [
+            {
+                label: 'react',
+                publishedAt: '2026-11-12T18:00:00Z',
+                tag: 'v19.3.0',
+                url: 'http://example.test/v19.3.0',
+            },
+        ]
+
+        await expect(publishBrief(brief)).rejects.toThrow(
+            'weeks/2026-11-17.json'
+        )
+        expect(bucket.size).toBe(0)
+    })
+
+    test('names the key of a stored week that is not valid JSON', async () => {
+        bucket.set('weeks/2026-11-10.json', '{"week":')
+
+        await expect(publishBrief(week('2026-11-17'))).rejects.toThrow(
+            'weeks/2026-11-10.json'
+        )
     })
 })

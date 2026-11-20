@@ -5,7 +5,7 @@ import {
     archiveSchema,
     type Brief,
     briefSchema,
-    parseStored,
+    parseStoredJson,
 } from './brief'
 import { INDEX_KEY, SPACES_PUBLIC_BASE_URL, WEEK_KEY_PREFIX } from './spaces'
 
@@ -24,7 +24,7 @@ async function fetchJson<T extends z.ZodType>(
         throw new Error(`${key}: ${response.status} ${response.statusText}`)
     }
 
-    return parseStored(schema, key, await response.json())
+    return parseStoredJson(schema, key, await response.text())
 }
 
 export async function readArchive(): Promise<ArchiveEntry[]> {
