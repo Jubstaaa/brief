@@ -21,6 +21,9 @@ jobs:
     # The full gate runs before the model calls, which are the only part of the
     # run that costs money.
     ci:
+        # A dispatch from another branch would run that branch's script with the
+        # inference and bucket keys.
+        if: github.ref == 'refs/heads/main'
         uses: ./.github/workflows/ci.yml
 
     generate:
