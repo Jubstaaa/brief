@@ -59,4 +59,9 @@ jobs:
               with:
                   source-dir: out
                   site: brief
+                  # The weekly run and a redeploy ship an unchanged main. Named by
+                  # SHA alone, that release is the live one: the action would
+                  # upload into the served directory and roll back to itself.
+                  release: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
                   health-url: https://brief.ilkerbalcilar.com/
+
