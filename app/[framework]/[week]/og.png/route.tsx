@@ -1,6 +1,6 @@
 import { ImageResponse } from 'next/og'
 
-import { readArchive, readBrief } from '@/lib/archive'
+import { readBrief, readWeekParams } from '@/lib/archive'
 import { OG_SIZE } from '@/lib/og'
 import { findRepoBySlug } from '@/lib/repos'
 import { SITE_NAME } from '@/lib/site'
@@ -8,15 +8,11 @@ import { formatRange } from '@/lib/window'
 
 export const dynamic = 'force-static'
 
-export async function generateStaticParams() {
-    const entries = await readArchive()
+// Only weeks listed in the index exist; anything else is a 404, in dev too.
+export const dynamicParams = false
 
-    return entries.flatMap(entry =>
-        entry.frameworks.map(framework => ({
-            framework: framework.slug,
-            week: entry.week,
-        }))
-    )
+export function generateStaticParams() {
+    return readWeekParams()
 }
 
 export async function GET(
@@ -25,9 +21,10 @@ export async function GET(
 ) {
     const { framework, week } = await params
     const config = findRepoBySlug(framework)
-    const brief = await readBrief(week)
 
-    if (!config || !brief) return new Response('Not found', { status: 404 })
+    if (!config) return new Response('Not found', { status: 404 })
+
+    const brief = await readBrief(week)
 
     const count = brief.items.filter(item => item.repo === config.label).length
 

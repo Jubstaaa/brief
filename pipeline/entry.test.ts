@@ -5,7 +5,15 @@ import type { Brief, BriefItem } from '@/lib/brief'
 import { toEntry } from './entry'
 
 function item(repo: string, pr: number): BriefItem {
-    return { action: '', detail: '', headline: '', kind: 'fix', pr, repo }
+    return {
+        action: '',
+        code: null,
+        detail: '',
+        headline: '',
+        kind: 'fix',
+        pr,
+        repo,
+    }
 }
 
 const brief: Brief = {

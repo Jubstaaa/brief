@@ -23,16 +23,20 @@ export async function fetchReleases(
         start: new Date(since),
     }
 
-    return items
-        .filter(item => !item.draft && !item.prerelease && item.published_at)
-        .filter(item => STABLE_TAG.test(item.tag_name))
-        .filter(item =>
-            isWithinInterval(new Date(item.published_at!), interval)
-        )
-        .map(item => ({
-            label: config.label,
-            publishedAt: item.published_at!,
-            tag: item.tag_name,
-            url: item.html_url,
-        }))
+    return items.flatMap(item => {
+        const publishedAt = item.published_at
+
+        if (item.draft || item.prerelease || !publishedAt) return []
+        if (!STABLE_TAG.test(item.tag_name)) return []
+        if (!isWithinInterval(new Date(publishedAt), interval)) return []
+
+        return [
+            {
+                label: config.label,
+                publishedAt,
+                tag: item.tag_name,
+                url: item.html_url,
+            },
+        ]
+    })
 }

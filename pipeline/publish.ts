@@ -1,4 +1,9 @@
-import type { Brief } from '@/lib/brief'
+import {
+    type Brief,
+    briefSchema,
+    parseStored,
+    parseStoredJson,
+} from '@/lib/brief'
 import {
     INDEX_KEY,
     SPACES_BUCKET,
@@ -32,30 +37,39 @@ function weekKey(week: string): string {
     return `${WEEK_KEY_PREFIX}${week}.json`
 }
 
+// Nothing is written until the new week and every stored week pass the schema
+// the site builds against, so a run that fails validation leaves the bucket as
+// it was. The week is written before the index, so a failed index write leaves
+// an unlisted week that the next run picks up.
 export async function publishBrief(brief: Brief): Promise<void> {
     const spaces = client()
-
-    await spaces.write(
-        weekKey(brief.week),
-        `${JSON.stringify(brief, null, 2)}\n`,
-        PUBLIC_JSON
-    )
+    const key = weekKey(brief.week)
+    const checked = parseStored(briefSchema, key, brief)
 
     const listed = await spaces.list({ prefix: WEEK_KEY_PREFIX })
-    const keys = (listed.contents ?? [])
+    const storedKeys = (listed.contents ?? [])
         .map(object => object.key)
-        .filter(key => key.endsWith('.json'))
+        .filter(stored => stored.endsWith('.json') && stored !== key)
 
-    const briefs = await Promise.all(
-        keys.map(
-            async key => JSON.parse(await spaces.file(key).text()) as Brief
+    const stored = await Promise.all(
+        storedKeys.map(async stored =>
+            parseStoredJson(
+                briefSchema,
+                stored,
+                await spaces.file(stored).text()
+            )
         )
     )
 
-    const index = briefs
+    const index = [checked, ...stored]
         .map(toEntry)
         .sort((a, b) => b.week.localeCompare(a.week))
 
+    await spaces.write(
+        key,
+        `${JSON.stringify(checked, null, 2)}\n`,
+        PUBLIC_JSON
+    )
     await spaces.write(
         INDEX_KEY,
         `${JSON.stringify(index, null, 2)}\n`,

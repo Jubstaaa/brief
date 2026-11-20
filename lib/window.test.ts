@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'bun:test'
 
-import { formatRange, resolveWindow } from './window'
+import { formatRange, resolveWindow, windowFromOptions } from './window'
 
 describe('resolveWindow', () => {
     test('covers the seven days ending at 09:00 on the current Tuesday', () => {
@@ -60,5 +60,191 @@ describe('formatRange', () => {
         expect(formatRange(window.since, window.until)).toBe(
             '21 Temmuz – 28 Temmuz'
         )
+    })
+})
+
+describe('windowFromOptions', () => {
+    const now = new Date('2026-07-28T06:00:00Z')
+
+    test('falls back to the resolved window for options that were not given', () => {
+        expect(
+            windowFromOptions(
+                { since: undefined, until: undefined, week: undefined },
+                now
+            )
+        ).toEqual(resolveWindow(now))
+    })
+
+    test('applies overrides and publishes them in UTC', () => {
+        expect(
+            windowFromOptions(
+                {
+                    since: '2026-07-14T09:00:00+03:00',
+                    until: '2026-07-21T09:00:00+03:00',
+                    week: '2026-07-21',
+                },
+                now
+            )
+        ).toEqual({
+            since: '2026-07-14T06:00:00.000Z',
+            until: '2026-07-21T06:00:00.000Z',
+            week: '2026-07-21',
+        })
+    })
+
+    test('labels an overridden window by the Istanbul date it ends on', () => {
+        expect(
+            windowFromOptions(
+                {
+                    since: '2026-07-07T06:00:00Z',
+                    until: '2026-07-14T06:00:00Z',
+                },
+                now
+            ).week
+        ).toBe('2026-07-14')
+    })
+
+    test('rejects a week label that does not match the window, since it would overwrite that week', () => {
+        expect(() => windowFromOptions({ week: '2026-07-21' }, now)).toThrow(
+            'week 2026-07-21 does not match the window ending 2026-07-28'
+        )
+    })
+
+    test('rejects a week label that is not a date, since it becomes a bucket key', () => {
+        expect(() => windowFromOptions({ week: '../index' }, now)).toThrow(
+            'week'
+        )
+    })
+
+    test('rejects a window bound that is not an ISO date-time', () => {
+        expect(() => windowFromOptions({ since: 'last tuesday' }, now)).toThrow(
+            'since'
+        )
+    })
+
+    test('rejects a window longer than two weeks, which would triage years of commits', () => {
+        expect(() =>
+            windowFromOptions(
+                {
+                    since: '2016-07-21T06:00:00Z',
+                    until: '2026-07-28T06:00:00Z',
+                },
+                now
+            )
+        ).toThrow('longer than 14 days')
+    })
+
+    test('rejects a window just over 14 days long', () => {
+        expect(() =>
+            windowFromOptions(
+                {
+                    since: '2026-07-14T05:59:00Z',
+                    until: '2026-07-28T06:00:00Z',
+                },
+                now
+            )
+        ).toThrow('longer than 14 days')
+    })
+
+    test('accepts a window of exactly 14 days', () => {
+        expect(
+            windowFromOptions(
+                {
+                    since: '2026-07-14T06:00:00Z',
+                    until: '2026-07-28T06:00:00Z',
+                },
+                now
+            ).since
+        ).toBe('2026-07-14T06:00:00.000Z')
+    })
+
+    test('rejects a window that ends in the future', () => {
+        expect(() =>
+            windowFromOptions(
+                {
+                    since: '2026-07-28T06:00:00Z',
+                    until: '2026-08-04T06:00:00Z',
+                },
+                now
+            )
+        ).toThrow('in the future')
+    })
+
+    test('accepts a window that ends exactly now', () => {
+        expect(
+            windowFromOptions(
+                {
+                    since: '2026-07-21T06:00:00Z',
+                    until: '2026-07-28T06:00:00Z',
+                },
+                now
+            ).until
+        ).toBe('2026-07-28T06:00:00.000Z')
+    })
+
+    test('rejects a window that ends a millisecond from now', () => {
+        expect(() =>
+            windowFromOptions(
+                {
+                    since: '2026-07-21T06:00:00Z',
+                    until: '2026-07-28T06:00:00.001Z',
+                },
+                now
+            )
+        ).toThrow('in the future')
+    })
+
+    test('labels a window ending just after midnight in Istanbul by the Istanbul date', () => {
+        const options = {
+            since: '2026-07-06T21:30:00Z',
+            until: '2026-07-13T21:30:00Z',
+        }
+
+        expect(windowFromOptions(options, now).week).toBe('2026-07-14')
+        expect(() =>
+            windowFromOptions({ ...options, week: '2026-07-13' }, now)
+        ).toThrow('does not match')
+    })
+
+    test('rejects a bound without a time zone', () => {
+        expect(() =>
+            windowFromOptions({ since: '2026-07-21T06:00:00' }, now)
+        ).toThrow('since')
+    })
+
+    test('rejects an empty window', () => {
+        expect(() =>
+            windowFromOptions(
+                {
+                    since: '2026-07-28T06:00:00Z',
+                    until: '2026-07-28T06:00:00Z',
+                },
+                now
+            )
+        ).toThrow('since must be before until')
+    })
+
+    test.each([
+        ['since', { since: '2026-07-24T06:00:00Z' }],
+        ['until', { until: '2026-07-24T06:00:00Z' }],
+    ])(
+        'rejects a backfill with only %s, which would mix in the scheduled window',
+        (_, options) => {
+            expect(() => windowFromOptions(options, now)).toThrow(
+                '--since and --until must be passed together'
+            )
+        }
+    )
+
+    test('rejects a window that ends before it starts', () => {
+        expect(() =>
+            windowFromOptions(
+                {
+                    since: '2026-07-29T00:00:00Z',
+                    until: '2026-07-28T06:00:00Z',
+                },
+                now
+            )
+        ).toThrow('since must be before until')
     })
 })

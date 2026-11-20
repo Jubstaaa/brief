@@ -1,5 +1,3 @@
-import type { Commit } from '@/pipeline/github/commits'
-
 const NOISE_PATTERNS: RegExp[] = [
     /^v?\d+\.\d+\.\d+(-\w+\.\d+)?$/,
     /^(chore|docs?|test|ci|build|style|revert)(\([^)]*\))?!?:/i,
@@ -17,15 +15,20 @@ export function isNoise(title: string, extra: RegExp[] = []): boolean {
     return [...NOISE_PATTERNS, ...extra].some(pattern => pattern.test(title))
 }
 
-export function filterCommits(
-    commits: Commit[],
+interface FilterableCommit {
+    prNumber: number | null
+    title: string
+}
+
+export function filterCommits<T extends FilterableCommit>(
+    commits: T[],
     extra: RegExp[] = []
 ): {
     dropped: number
-    kept: Commit[]
+    kept: T[]
 } {
     const seen = new Set<number>()
-    const kept: Commit[] = []
+    const kept: T[] = []
 
     for (const commit of commits) {
         if (isNoise(commit.title, extra)) continue

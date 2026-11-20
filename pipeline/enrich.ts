@@ -43,8 +43,9 @@ export async function enrich(
 ): Promise<PullDetail[]> {
     const known = inWindow(repos)
     const details: PullDetail[] = []
+    const refs = referencedPulls(triaged)
 
-    for (const ref of referencedPulls(triaged)) {
+    for (const ref of refs) {
         const config = findRepo(ref.repo)
 
         if (!config) {
@@ -62,6 +63,14 @@ export async function enrich(
         } catch (error) {
             consola.warn(`${refKey(ref)} could not be fetched, skipping`, error)
         }
+    }
+
+    // Same guard as triage and draft: with no detail at all, draft would
+    // report its own failure and point at the model instead of GitHub.
+    if (refs.length && !details.length) {
+        throw new Error(
+            `could not fetch any of the ${refs.length} picked pull requests`
+        )
     }
 
     return details
