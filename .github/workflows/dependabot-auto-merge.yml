@@ -41,12 +41,14 @@ jobs:
                   sleep 30
                   gh pr checks "$PR_URL" --required --watch --fail-fast --interval 20
                   # main requires branches to be up to date. A PR that fell
-                  # behind cannot merge; ask Dependabot to rebase, and the push
-                  # starts this workflow again.
+                  # behind cannot merge; ask Dependabot to rebase, and its push
+                  # starts this workflow again. Fail this run so a PR that
+                  # Dependabot does not rebase is not left open unnoticed.
                   state=$(gh pr view "$PR_URL" --json mergeStateStatus --jq .mergeStateStatus)
                   if [ "$state" = BEHIND ]; then
                       gh pr comment "$PR_URL" --body '@dependabot rebase'
-                      exit 0
+                      echo "::error::$PR_URL is behind main; asked Dependabot to rebase. Merge it by hand if no new run follows."
+                      exit 1
                   fi
                   gh pr merge --merge "$PR_URL"
                   gh workflow run deploy.yml --ref "$BASE"

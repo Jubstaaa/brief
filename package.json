@@ -60,7 +60,7 @@
         "audit": "bun audit --audit-level=high",
         "knip": "knip",
         "jscpd": "jscpd",
-        "depcruise": "depcruise --config .dependency-cruiser.cjs app components lib pipeline scripts"
+        "depcruise": "depcruise --config .dependency-cruiser.mjs app components lib pipeline scripts"
     },
     "overrides": {
         "postcss-selector-parser": "^7.1.6"
