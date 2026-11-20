@@ -31,6 +31,11 @@ concurrency:
 jobs:
     deploy:
         if: github.ref == 'refs/heads/main'
+        # The environment only accepts main, enforced by GitHub, so a branch
+        # that edits the guard above still cannot deploy.
+        environment:
+            name: production
+            url: https://brief.ilkerbalcilar.com/
         runs-on: ubuntu-latest
         timeout-minutes: 15
         steps:
