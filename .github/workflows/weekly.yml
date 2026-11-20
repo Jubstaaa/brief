@@ -26,6 +26,8 @@ jobs:
     generate:
         needs: ci
         runs-on: ubuntu-latest
+        # A normal run takes about two minutes; the default is six hours.
+        timeout-minutes: 30
         permissions:
             contents: read
         steps:
@@ -58,4 +60,9 @@ jobs:
     publish:
         needs: generate
         uses: ./.github/workflows/deploy.yml
-        secrets: inherit
+        # Only what the deploy needs; the inference and bucket keys stay here.
+        secrets:
+            DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+            DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+            DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+            DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}

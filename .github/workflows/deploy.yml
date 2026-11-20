@@ -5,6 +5,15 @@ on:
         branches: [main]
     workflow_dispatch:
     workflow_call:
+        secrets:
+            DEPLOY_HOST:
+                required: true
+            DEPLOY_USER:
+                required: true
+            DEPLOY_SSH_KEY:
+                required: true
+            DEPLOY_KNOWN_HOSTS:
+                required: true
 
 permissions:
     contents: read
@@ -14,12 +23,12 @@ concurrency:
     group: deploy-brief
     cancel-in-progress: false
 
+# No gate here: main only moves through PRs whose required `check` ran on a
+# branch that was up to date with main (strict status checks), so the merge
+# commit is what CI already checked. The weekly run gates before it calls the
+# model.
 jobs:
-    ci:
-        uses: ./.github/workflows/ci.yml
-
     deploy:
-        needs: ci
         runs-on: ubuntu-latest
         timeout-minutes: 15
         steps:
