@@ -17,7 +17,8 @@ const PROSE_BASE = [
 const PROSE_MUTED_CLASS = `${PROSE_BASE} prose-p:text-muted prose-p:text-sm`
 
 // The text is written by a model from upstream pull requests and published
-// without review, so a link it writes must at least be https.
+// without review, so a link it writes must at least be https. Hosts are not
+// restricted: the model legitimately links to framework docs.
 function httpsOnly(url: string): string {
     const safe = defaultUrlTransform(url)
 

@@ -53,8 +53,9 @@ const isoInstant = z.iso
     .datetime({ offset: true })
     .transform(value => toUtcIso(new Date(value)))
 
-// Overrides come from workflow_dispatch inputs. The week label becomes the
-// bucket key weeks/<week>.json and a page URL, so it must be a plain date.
+// Overrides come from the CLI (workflow_dispatch inputs or a local backfill).
+// The week label becomes the bucket key weeks/<week>.json and a page URL, so
+// it must be a plain date.
 const windowOptionsSchema = z.object({
     since: isoInstant.optional(),
     until: isoInstant.optional(),
@@ -78,8 +79,8 @@ export function windowFromOptions(
     const resolved = resolveWindow(now)
     const since = parsed.data.since ?? resolved.since
     const until = parsed.data.until ?? resolved.until
-    // The label names the bucket key, so it must be the week the window
-    // ends in; a free label would overwrite another week's file.
+    // The label names the bucket key, so it must be the Istanbul date the
+    // window ends on; a free label would overwrite another week's file.
     const week = format(inZone(new Date(until)), 'yyyy-MM-dd')
 
     if (since >= until) {

@@ -26,7 +26,7 @@ draft       per change: what it does, and what it means in practice
    ↓
 publish     weeks/<week>.json + index.json → DigitalOcean Spaces
    ↓
-next build  reads the published JSON over HTTPS, static export → out/
+next build  reads the published JSON over HTTPS, validates it, static export → out/
 ```
 
 Model output lives as JSON in a Spaces bucket, and the pages are generated from it. Changing
@@ -35,6 +35,12 @@ the design later means re-running `next build`, not paying for inference again.
 The split is deliberate: publishing needs write credentials, but the objects are public-read,
 so `next build` fetches them over plain HTTPS with no credentials at all.
 
+Neither side trusts the bucket. `index.json` and every week it lists are checked against the
+schema in `lib/brief.ts` (dates, item kinds, `https://github.com` links only), and a missing or
+invalid file fails the build instead of deploying a site with weeks missing, so a brand-new
+bucket needs one `bun run generate` before the first deploy. `publish` checks the new week and
+every stored week before it writes anything.
+
 ## Commands
 
 ```bash
@@ -42,7 +48,7 @@ bun install
 
 bun run generate -- --dry-run    # fetch and filter only, no model calls
 bun run generate                 # full run for the current week → publishes to Spaces
-bun run generate -- --since=2026-07-20T21:00:00Z --until=2026-07-27T21:00:00Z --week=2026-07-28
+bun run generate -- --since=2026-07-21T06:00:00Z --until=2026-07-28T06:00:00Z   # backfill
 
 bun run dev                      # preview the pages locally
 bun run build                    # static export → out/
@@ -54,6 +60,13 @@ bun run type-check
 
 `--dry-run` is the fast loop for tuning the noise filter: it shows what survived without
 spending a token.
+
+`--since` and `--until` take ISO date-times with seconds and a `Z` or `±HH:MM` offset
+(`2026-07-21T06:00:00Z`, `2026-07-21T09:00:00+03:00`) and are stored in UTC. An option you
+leave out falls back to the current week, so a backfill passes both. The window may be at most
+14 days and cannot end in the future. The week label is always the Istanbul date the window
+ends on; `--week` is optional and only has to match it, so a typo cannot overwrite another
+week's file.
 
 ## Environment
 
@@ -121,7 +134,7 @@ One entry in `REPOS` in `lib/repos.ts`:
     locative: "Expo'da",    // title with its Turkish -de/-da suffix
     owner: 'expo',
     repo: 'expo',
-    slug: 'expo',           // URL segment
+    slug: 'expo',           // URL segment: lowercase letters, digits, hyphens
     title: 'Expo',
     noise: [/^some repo-specific noise/i], // optional
 },

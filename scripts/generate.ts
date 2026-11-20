@@ -10,9 +10,18 @@ new Command()
         'Fetch a week of commits, write the brief and publish it to Spaces'
     )
     .option('--dry-run', 'fetch and filter only, no inference calls', false)
-    .option('--since <iso>', 'override the start of the window')
-    .option('--until <iso>', 'override the end of the window')
-    .option('--week <date>', 'override the week label (YYYY-MM-DD)')
+    .option(
+        '--since <iso>',
+        'start of the window, ISO date-time with Z or offset'
+    )
+    .option(
+        '--until <iso>',
+        'end of the window, ISO date-time with Z or offset; at most 14 days after --since, not in the future'
+    )
+    .option(
+        '--week <date>',
+        'expected week label (YYYY-MM-DD); must be the Istanbul date --until falls on'
+    )
     .action(async options => {
         const briefWindow = windowFromOptions(
             { since: options.since, until: options.until, week: options.week },

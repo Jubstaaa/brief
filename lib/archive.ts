@@ -9,7 +9,7 @@ import {
 } from './brief'
 import { INDEX_KEY, SPACES_PUBLIC_BASE_URL, WEEK_KEY_PREFIX } from './spaces'
 
-// Every key read here is listed in the index the pipeline wrote, so a missing
+// index.json and every week it lists are written by the pipeline, so a missing
 // one is a broken bucket, never an empty archive: fail the build rather than
 // deploy a site without weeks.
 async function fetchJson<T extends z.ZodType>(
