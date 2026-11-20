@@ -23,12 +23,14 @@ concurrency:
     group: deploy-brief
     cancel-in-progress: false
 
-# No gate here: main only moves through PRs whose required `check` ran on a
-# branch that was up to date with main (strict status checks), so the merge
-# commit is what CI already checked. The weekly run gates before it calls the
-# model.
+# No gate here: main only accepts commits whose required `check` passed on a
+# branch that was up to date with main (strict status checks), so what lands on
+# main is what CI already checked. The weekly run gates before it calls the
+# model. A manual dispatch is the redeploy path and skips the gate on purpose,
+# which is why it only ever deploys main.
 jobs:
     deploy:
+        if: github.ref == 'refs/heads/main'
         runs-on: ubuntu-latest
         timeout-minutes: 15
         steps:
