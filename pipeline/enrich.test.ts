@@ -78,4 +78,24 @@ describe('enrich', () => {
 
         expect(details.map(detail => detail.number)).toEqual([2])
     })
+
+    test('throws when none of the picked pull requests could be fetched', async () => {
+        fetchPullDetail.mockRejectedValue(new Error('503'))
+
+        await expect(
+            enrich(
+                {
+                    picks: [
+                        { kind: 'fix', pr: 1, reason: 'r', repo: 'react' },
+                        { kind: 'fix', pr: 2, reason: 'r', repo: 'react' },
+                    ],
+                },
+                repos
+            )
+        ).rejects.toThrow('could not fetch any of the 2 picked pull requests')
+    })
+
+    test('returns nothing for a week without picks', async () => {
+        expect(await enrich({ picks: [] }, repos)).toEqual([])
+    })
 })

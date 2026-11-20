@@ -1,7 +1,7 @@
 import { consola } from 'consola'
 import { compact } from 'es-toolkit'
 
-import type { BriefItem } from '@/lib/brief'
+import { type BriefItem, codeLangSchema } from '@/lib/brief'
 import { findRepo } from '@/lib/repos'
 import type { PullDetail } from '@/pipeline/github/pulls'
 import { complete } from '@/pipeline/inference/client'
@@ -18,6 +18,25 @@ import {
 
 import { draftItemSchema } from './draft.schema'
 import type { Triage, TriagePick } from './triage.schema'
+
+// The site splices the language into a code fence, so it only takes a plain
+// token. A sample that does not fit is dropped, not the item, and the warning
+// keeps a prompt or model change that breaks every sample from going unseen.
+function renderableCode(
+    pick: TriagePick,
+    code: BriefItem['code'] | undefined
+): BriefItem['code'] {
+    if (!code) return null
+
+    if (!codeLangSchema.safeParse(code.lang).success) {
+        consola.warn(
+            `${pick.repo}#${pick.pr}: code language "${code.lang}" cannot be rendered, dropping the sample`
+        )
+        return null
+    }
+
+    return code
+}
 
 async function draftOne(
     pick: TriagePick,
@@ -37,7 +56,7 @@ async function draftOne(
 
         return {
             action: written.action,
-            code: written.code ?? null,
+            code: renderableCode(pick, written.code),
             detail: written.detail,
             headline: written.headline,
             kind: pick.kind,
@@ -77,7 +96,15 @@ export async function draft(
             compact(
                 triaged.picks.map(pick => {
                     const detail = byPull.get(`${pick.repo}#${pick.pr}`)
-                    return detail ? { detail, pick } : undefined
+
+                    if (!detail) {
+                        consola.warn(
+                            `${pick.repo}#${pick.pr} has no pull request detail, skipping`
+                        )
+                        return undefined
+                    }
+
+                    return { detail, pick }
                 })
             ).map(({ detail, pick }) => draftOne(pick, detail))
         )

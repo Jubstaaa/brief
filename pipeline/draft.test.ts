@@ -1,4 +1,13 @@
-import { beforeEach, describe, expect, mock, test } from 'bun:test'
+import {
+    afterEach,
+    beforeEach,
+    describe,
+    expect,
+    mock,
+    spyOn,
+    test,
+} from 'bun:test'
+import { consola } from 'consola'
 import type { z } from 'zod'
 
 import { briefSchema } from '@/lib/brief'
@@ -41,6 +50,10 @@ const written = {
 
 beforeEach(() => {
     complete.mockReset()
+})
+
+afterEach(() => {
+    mock.restore()
 })
 
 describe('draft', () => {
@@ -95,11 +108,17 @@ describe('draft', () => {
             })
         )
 
+        const silent = Object.assign(() => {}, { raw: () => {} })
+        const warn = spyOn(consola, 'warn').mockImplementation(silent)
+
         const items = await draft({ picks: [pick(1)] }, [detail(1)])
 
         expect(items).toHaveLength(1)
         expect(items[0]?.code).toBeNull()
         expect(briefSchema.shape.items.safeParse(items).success).toBe(true)
+        expect(String(warn.mock.calls[0]?.[0])).toContain(
+            'react#1: code language "shell session"'
+        )
     })
 
     test('keeps at most MAX_CODE_BLOCKS code samples per repo', async () => {
