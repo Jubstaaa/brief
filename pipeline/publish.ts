@@ -1,4 +1,4 @@
-import type { Brief } from '@/lib/brief'
+import { type Brief, briefSchema, parseStored } from '@/lib/brief'
 import {
     INDEX_KEY,
     SPACES_BUCKET,
@@ -47,8 +47,12 @@ export async function publishBrief(brief: Brief): Promise<void> {
         .filter(key => key.endsWith('.json'))
 
     const briefs = await Promise.all(
-        keys.map(
-            async key => JSON.parse(await spaces.file(key).text()) as Brief
+        keys.map(async key =>
+            parseStored(
+                briefSchema,
+                key,
+                JSON.parse(await spaces.file(key).text())
+            )
         )
     )
 
