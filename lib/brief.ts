@@ -17,7 +17,7 @@ const githubUrl = z.url({ hostname: /^github\.com$/, protocol: /^https$/ })
 
 // The language is spliced into a Markdown code fence; a newline or backtick
 // would end the fence early.
-const codeLangSchema = z.string().regex(/^[\w#+.-]{1,20}$/)
+export const codeLangSchema = z.string().regex(/^[\w#+.-]{1,20}$/)
 
 // Slugs become route segments of the static export.
 const slugSchema = z.string().regex(/^[a-z0-9-]+$/)

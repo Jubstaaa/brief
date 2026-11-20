@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
 
+import { briefSchema } from '@/lib/brief'
 import type { PullDetail } from '@/pipeline/github/pulls'
 import { MAX_CODE_BLOCKS } from '@/pipeline/inference/config'
 
@@ -82,6 +83,27 @@ describe('draft', () => {
         const prompt = String(complete.mock.calls[0]?.[0]?.user)
         expect(prompt).toContain('expo PR 7')
         expect(prompt).not.toContain('react PR 7')
+    })
+
+    test('keeps the item but drops a code sample the site could not render', async () => {
+        // complete() parses the model's JSON with the schema it is given.
+        complete.mockImplementation(
+            async ({
+                schema,
+            }: {
+                schema: { parse: (v: unknown) => unknown }
+            }) =>
+                schema.parse({
+                    ...written,
+                    code: { lang: 'shell session', snippet: 'x' },
+                })
+        )
+
+        const items = await draft({ picks: [pick(1)] }, [detail(1)])
+
+        expect(items).toHaveLength(1)
+        expect(items[0]?.code).toBeNull()
+        expect(briefSchema.shape.items.safeParse(items).success).toBe(true)
     })
 
     test('keeps at most MAX_CODE_BLOCKS code samples per repo', async () => {
