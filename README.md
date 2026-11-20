@@ -93,12 +93,16 @@ week's file.
 
 Two workflows, and only one of them costs anything.
 
-`deploy.yml` is the whole deployment: it runs the `ci.yml` gate, runs `next build` against
-whatever is already in Spaces, and ships `out/` to the box where Caddy serves it through
+`deploy.yml` builds and ships `main`: it runs `next build` against whatever is already in
+Spaces and ships `out/` to the box where Caddy serves it through
 `Jubstaaa/deploy-actions/static` (an atomic switch that rolls back if the site stops
-answering). It runs
-on every push to `main`, so a code change ships without regenerating a brief. Pull requests
-get the checks and stop there. No container, no app server — just files.
+answering). It runs no gate of its own: `main` only accepts commits whose required `check`
+passed on a branch that was up to date with it. It runs on every push to `main`, so a code
+change ships without regenerating a brief; on a manual dispatch, which redeploys `main` and
+nothing else; and after a Dependabot auto-merge, which dispatches it because a bot merge
+starts no push workflow. The deploy job runs in the `production` environment, which only
+accepts `main`. A failed deploy on `main` opens (or comments on) a "Production deploy failed"
+issue. Pull requests get the checks and stop there. No container, no app server — just files.
 
 `weekly.yml` runs the same gate, publishes that week's JSON to Spaces and then calls
 `deploy.yml` to render and ship it. The build always happens on a runner, never on the box, which has under 300 MB of
@@ -114,6 +118,21 @@ repository only; the event retries twice and its run history shows the failure w
 PAT eventually expires.
 
 Nothing is committed back to the repository.
+
+### Rolling back
+
+Every run uploads its own release (`<sha>-<run id>-<attempt>`) and the host keeps the last
+five under `/opt/proxy/sites/_releases/brief`, so there is always a previous build to go back to.
+
+- **Bad code:** revert the commit on `main` through a PR. The merge deploys the reverted build.
+- **Bad build, fast:** `deploy.yml` has no rollback input, so switch the site back to the
+  previous release on the host with the action's own script, from a checkout of
+  `Jubstaaa/deploy-actions`:
+  `ssh <droplet> 'bash -s -- rollback /opt/proxy/sites brief' < static/release.sh`.
+  The next deploy of `main` replaces it, so revert the cause as well.
+- **Redeploy `main`** (for example after fixing a bucket object):
+  `gh workflow run deploy.yml --ref main`.
+- **Bad week:** fix or delete its JSON in the bucket as described above.
 
 Repository secrets: `DO_INFERENCE_API_KEY`, `SPACES_KEY`, `SPACES_SECRET`, `DEPLOY_SSH_KEY`,
 `DEPLOY_HOST`, `DEPLOY_USER`, `DEPLOY_KNOWN_HOSTS`. They are not edited here: Infisical (project `brief-site`,
