@@ -146,6 +146,54 @@ describe('windowFromOptions', () => {
         ).toThrow('in the future')
     })
 
+    test('accepts a window that ends exactly now', () => {
+        expect(
+            windowFromOptions(
+                {
+                    since: '2026-07-21T06:00:00Z',
+                    until: '2026-07-28T06:00:00Z',
+                },
+                now
+            ).until
+        ).toBe('2026-07-28T06:00:00.000Z')
+    })
+
+    test('rejects a window that ends a millisecond from now', () => {
+        expect(() =>
+            windowFromOptions({ until: '2026-07-28T06:00:00.001Z' }, now)
+        ).toThrow('in the future')
+    })
+
+    test('labels a window ending just after midnight in Istanbul by the Istanbul date', () => {
+        const options = {
+            since: '2026-07-06T21:30:00Z',
+            until: '2026-07-13T21:30:00Z',
+        }
+
+        expect(windowFromOptions(options, now).week).toBe('2026-07-14')
+        expect(() =>
+            windowFromOptions({ ...options, week: '2026-07-13' }, now)
+        ).toThrow('does not match')
+    })
+
+    test('rejects a bound without a time zone', () => {
+        expect(() =>
+            windowFromOptions({ since: '2026-07-21T06:00:00' }, now)
+        ).toThrow('since')
+    })
+
+    test('rejects an empty window', () => {
+        expect(() =>
+            windowFromOptions(
+                {
+                    since: '2026-07-28T06:00:00Z',
+                    until: '2026-07-28T06:00:00Z',
+                },
+                now
+            )
+        ).toThrow('since must be before until')
+    })
+
     test('rejects a window that ends before it starts', () => {
         expect(() =>
             windowFromOptions({ since: '2026-07-29T00:00:00Z' }, now)

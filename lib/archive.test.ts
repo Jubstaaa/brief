@@ -85,14 +85,14 @@ describe('readArchive', () => {
 
         await expect(readArchive()).rejects.toThrow('index.json: invalid JSON')
     })
-})
 
-test('rejects a framework slug that is not a plain path segment', async () => {
-    respondWith([
-        { ...entry, frameworks: [{ itemCount: 1, slug: '../admin' }] },
-    ])
+    test('rejects a framework slug that is not a plain path segment', async () => {
+        respondWith([
+            { ...entry, frameworks: [{ itemCount: 1, slug: '../admin' }] },
+        ])
 
-    await expect(readArchive()).rejects.toThrow('slug')
+        await expect(readArchive()).rejects.toThrow('slug')
+    })
 })
 
 describe('readBrief', () => {

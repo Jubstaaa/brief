@@ -104,7 +104,28 @@ describe('publishBrief', () => {
         expect(bucket.has('index.json')).toBe(false)
     })
 
+    test('replaces a week that is published again, even a corrupt copy', async () => {
+        bucket.set('weeks/2026-11-17.json', JSON.stringify({ week: 'x' }))
+        bucket.set('weeks/2026-11-10.json', JSON.stringify(week('2026-11-10')))
+
+        const again = { ...week('2026-11-17'), model: 'second run' }
+        await publishBrief(again)
+
+        const index = JSON.parse(bucket.get('index.json') ?? '[]') as {
+            week: string
+        }[]
+        expect(index.map(entry => entry.week)).toEqual([
+            '2026-11-17',
+            '2026-11-10',
+        ])
+        expect(
+            JSON.parse(bucket.get('weeks/2026-11-17.json') ?? '{}').model
+        ).toBe('second run')
+    })
+
     test('refuses to publish a brief the site would reject', async () => {
+        const stored = JSON.stringify(week('2026-11-10'))
+        bucket.set('weeks/2026-11-10.json', stored)
         const brief = week('2026-11-17')
         brief.releases = [
             {
@@ -118,14 +139,17 @@ describe('publishBrief', () => {
         await expect(publishBrief(brief)).rejects.toThrow(
             'weeks/2026-11-17.json'
         )
-        expect(bucket.size).toBe(0)
+        expect([...bucket.entries()]).toEqual([
+            ['weeks/2026-11-10.json', stored],
+        ])
     })
 
     test('names the key of a stored week that is not valid JSON', async () => {
         bucket.set('weeks/2026-11-10.json', '{"week":')
 
         await expect(publishBrief(week('2026-11-17'))).rejects.toThrow(
-            'weeks/2026-11-10.json'
+            'weeks/2026-11-10.json: invalid JSON'
         )
+        expect([...bucket.keys()]).toEqual(['weeks/2026-11-10.json'])
     })
 })

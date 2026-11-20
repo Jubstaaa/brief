@@ -12,12 +12,21 @@ describe('Prose', () => {
         ).toContain('href="https://react.dev/reference"')
     })
 
-    test('drops the target of a plain http link written by the model', () => {
-        const html = renderToStaticMarkup(
-            <Prose content="[guide](http://evil.test/migrate)" />
-        )
+    test.each([
+        ['plain http', '[guide](http://evil.test/migrate)'],
+        ['protocol-relative', '[guide](//evil.test/migrate)'],
+        ['javascript', '[guide](javascript:alert(1))'],
+        ['an http image', '![guide](http://evil.test/a.png)'],
+    ])('drops the target of a %s link written by the model', (_, content) => {
+        const html = renderToStaticMarkup(<Prose content={content} />)
 
         expect(html).not.toContain('evil.test')
-        expect(html).toContain('guide')
+        expect(html).not.toContain('javascript:')
+    })
+
+    test('drops relative links, which mean nothing on this site', () => {
+        expect(
+            renderToStaticMarkup(<Prose content="[guide](/docs)" />)
+        ).not.toContain('href="/docs"')
     })
 })
