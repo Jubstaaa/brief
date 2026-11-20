@@ -22,7 +22,10 @@ const complete = mock()
 // mock.module replaces the module for every importer in the run, so keep its
 // other exports.
 const client = await import('@/pipeline/inference/client')
-mock.module('@/pipeline/inference/client', () => ({ ...client, complete }))
+await mock.module('@/pipeline/inference/client', () => ({
+    ...client,
+    complete,
+}))
 
 const { draft } = await import('./draft')
 
@@ -95,7 +98,7 @@ describe('draft', () => {
             detail(7, 'react'),
         ])
 
-        const prompt = String(complete.mock.calls[0]?.[0]?.user)
+        const [{ user: prompt }] = complete.mock.calls[0] as [{ user: string }]
         expect(prompt).toContain('expo PR 7')
         expect(prompt).not.toContain('react PR 7')
     })

@@ -6,6 +6,7 @@ import perfectionistPlugin from 'eslint-plugin-perfectionist'
 import prettierPlugin from 'eslint-plugin-prettier'
 import reactPlugin from 'eslint-plugin-react'
 import { defineConfig, globalIgnores } from 'eslint/config'
+import tseslint from 'typescript-eslint'
 
 export default defineConfig([
     globalIgnores(['.next', 'out', 'next-env.d.ts']),
@@ -13,6 +14,17 @@ export default defineConfig([
     js.configs.recommended,
     ...nextVitals,
     ...nextTypescript,
+
+    {
+        extends: [tseslint.configs.recommendedTypeChecked],
+        files: ['**/*.{ts,tsx}'],
+        languageOptions: {
+            parserOptions: {
+                projectService: true,
+                tsconfigRootDir: import.meta.dirname,
+            },
+        },
+    },
 
     {
         files: ['**/*.{ts,tsx,mjs}'],
@@ -129,6 +141,16 @@ export default defineConfig([
             ],
         },
         settings: { react: { version: '19.2' } },
+    },
+
+    {
+        // bun:test types `expect(promise).rejects` matchers as returning void,
+        // and test fakes stand in for async APIs without awaiting anything.
+        files: ['**/*.test.ts'],
+        rules: {
+            '@typescript-eslint/await-thenable': 'off',
+            '@typescript-eslint/require-await': 'off',
+        },
     },
 
     {

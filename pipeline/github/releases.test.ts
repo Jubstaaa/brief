@@ -7,7 +7,7 @@ const paginate = mock()
 // mock.module replaces the module for every importer in the run, so keep the
 // real octokit and override only the call this test drives.
 const client = await import('./client')
-mock.module('./client', () => ({
+await mock.module('./client', () => ({
     ...client,
     octokit: { ...client.octokit, paginate },
 }))

@@ -4,6 +4,13 @@ import { consola } from 'consola'
 import { windowFromOptions } from '@/lib/window'
 import { run } from '@/pipeline/run'
 
+interface GenerateOptions {
+    dryRun: boolean
+    since?: string
+    until?: string
+    week?: string
+}
+
 new Command()
     .name('generate')
     .description(
@@ -22,7 +29,7 @@ new Command()
         '--week <date>',
         'expected week label (YYYY-MM-DD); must be the Istanbul date --until falls on'
     )
-    .action(async options => {
+    .action(async (options: GenerateOptions) => {
         const briefWindow = windowFromOptions(
             { since: options.since, until: options.until, week: options.week },
             new Date()

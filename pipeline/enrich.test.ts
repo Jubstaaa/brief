@@ -7,7 +7,10 @@ const fetchPullDetail = mock()
 // mock.module replaces the module for every importer in the run, so keep its
 // other exports.
 const pulls = await import('@/pipeline/github/pulls')
-mock.module('@/pipeline/github/pulls', () => ({ ...pulls, fetchPullDetail }))
+await mock.module('@/pipeline/github/pulls', () => ({
+    ...pulls,
+    fetchPullDetail,
+}))
 
 const { enrich } = await import('./enrich')
 
