@@ -119,7 +119,8 @@ describe('publishBrief', () => {
             '2026-11-10',
         ])
         expect(
-            JSON.parse(bucket.get('weeks/2026-11-17.json') ?? '{}').model
+            (JSON.parse(bucket.get('weeks/2026-11-17.json') ?? '{}') as Brief)
+                .model
         ).toBe('second run')
     })
 

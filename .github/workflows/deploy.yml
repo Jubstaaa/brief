@@ -5,6 +5,15 @@ on:
         branches: [main]
     workflow_dispatch:
     workflow_call:
+        secrets:
+            DEPLOY_HOST:
+                required: true
+            DEPLOY_USER:
+                required: true
+            DEPLOY_SSH_KEY:
+                required: true
+            DEPLOY_KNOWN_HOSTS:
+                required: true
 
 permissions:
     contents: read
@@ -14,12 +23,19 @@ concurrency:
     group: deploy-brief
     cancel-in-progress: false
 
+# No gate here: main only accepts commits whose required `check` passed on a
+# branch that was up to date with main (strict status checks), so what lands on
+# main is what CI already checked. The weekly run gates before it calls the
+# model. A manual dispatch is the redeploy path and skips the gate on purpose,
+# which is why it only ever deploys main.
 jobs:
-    ci:
-        uses: ./.github/workflows/ci.yml
-
     deploy:
-        needs: ci
+        if: github.ref == 'refs/heads/main'
+        # The environment only accepts main, enforced by GitHub, so a branch
+        # that edits the guard above still cannot deploy.
+        environment:
+            name: production
+            url: https://brief.ilkerbalcilar.com/
         runs-on: ubuntu-latest
         timeout-minutes: 15
         steps:
@@ -43,4 +59,41 @@ jobs:
               with:
                   source-dir: out
                   site: brief
+                  # The weekly run and a redeploy ship an unchanged main. Named by
+                  # SHA alone, that release is the live one: the action would
+                  # upload into the served directory and roll back to itself.
+                  release: ${{ github.sha }}-${{ github.run_id }}-${{ github.run_attempt }}
                   health-url: https://brief.ilkerbalcilar.com/
+
+    # A deploy dispatched by the Dependabot auto-merge runs as the bot, so
+    # GitHub's failure e-mail reaches nobody; an issue notifies the owner.
+    alert:
+        needs: deploy
+        if: ${{ failure() && github.ref == 'refs/heads/main' }}
+        runs-on: ubuntu-latest
+        timeout-minutes: 5
+        permissions:
+            issues: write
+        steps:
+            - name: Open or update the deploy-failure issue
+              env:
+                  GH_TOKEN: ${{ github.token }}
+                  GH_REPO: ${{ github.repository }}
+                  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+                  TITLE: Production deploy failed
+              run: |
+                  body="Run: $RUN_URL (commit $GITHUB_SHA). Production may be on the previous release or down; check the deploy log."
+                  # Anyone can open an issue on this public repository, so only
+                  # an issue this workflow created counts; gh reports the bot's
+                  # login as app/github-actions.
+                  gh label create deploy-failure --force --color B60205 \
+                      --description 'Opened by the deploy workflow'
+                  existing=$(gh issue list --state open --author app/github-actions \
+                      --label deploy-failure --search "\"$TITLE\" in:title" \
+                      --json number,author \
+                      --jq '[.[] | select(.author.is_bot and .author.login == "app/github-actions")][0].number // empty')
+                  if [ -n "$existing" ]; then
+                      gh issue comment "$existing" --body "$body"
+                  else
+                      gh issue create --title "$TITLE" --body "$body" --label deploy-failure
+                  fi

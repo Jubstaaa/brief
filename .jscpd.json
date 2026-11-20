@@ -1,0 +1,10 @@
+{
+    "path": ["app", "components", "lib", "pipeline", "scripts"],
+    "ignore": ["**/*.test.ts", "**/*.test.tsx"],
+    "minTokens": 60,
+    "threshold": 3,
+    "reporters": ["console"],
+    "absolute": false,
+    "gitignore": true,
+    "exitCode": 1
+}

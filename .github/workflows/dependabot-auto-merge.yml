@@ -2,18 +2,26 @@ name: Dependabot auto-merge
 
 on: pull_request
 
-permissions:
-    contents: write
-    pull-requests: write
-    # gh pr checks reads the required checks through these.
-    checks: read
-    statuses: read
-    # Dispatches the deploy after merging.
-    actions: write
+# Every PR starts this workflow; only the Dependabot job below gets write scopes.
+permissions: {}
+
+# A push or rebase supersedes the previous watcher, which would otherwise
+# race the new one to merge.
+concurrency:
+    group: automerge-${{ github.event.pull_request.number }}
+    cancel-in-progress: true
 
 jobs:
     auto-merge:
         if: github.event.pull_request.user.login == 'dependabot[bot]'
+        permissions:
+            contents: write
+            pull-requests: write
+            # gh pr checks reads the required checks through these.
+            checks: read
+            statuses: read
+            # Dispatches the deploy after merging.
+            actions: write
         runs-on: ubuntu-latest
         timeout-minutes: 40
         steps:
@@ -34,11 +42,28 @@ jobs:
                   steps.metadata.outputs.package-ecosystem != 'docker'
               env:
                   GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  # The job has no checkout, so gh cannot infer the repository.
+                  GH_REPO: ${{ github.repository }}
                   PR_URL: ${{ github.event.pull_request.html_url }}
                   BASE: ${{ github.event.pull_request.base.ref }}
               run: |
                   # Let the required checks register before watching them.
                   sleep 30
                   gh pr checks "$PR_URL" --required --watch --fail-fast --interval 20
+                  # main requires branches to be up to date. A PR that fell
+                  # behind cannot merge; ask Dependabot to rebase, and its push
+                  # starts this workflow again. Fail this run so a PR that
+                  # Dependabot does not rebase is not left open unnoticed.
+                  # mergeStateStatus is UNKNOWN while GitHub recomputes it.
+                  for _ in 1 2 3 4 5 6; do
+                      state=$(gh pr view "$PR_URL" --json mergeStateStatus --jq .mergeStateStatus)
+                      [ "$state" != UNKNOWN ] && break
+                      sleep 10
+                  done
+                  if [ "$state" = BEHIND ]; then
+                      gh pr comment "$PR_URL" --body '@dependabot rebase'
+                      echo "::error::$PR_URL is behind main; asked Dependabot to rebase. Merge it by hand if no new run follows."
+                      exit 1
+                  fi
                   gh pr merge --merge "$PR_URL"
                   gh workflow run deploy.yml --ref "$BASE"

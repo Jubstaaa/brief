@@ -21,11 +21,16 @@ jobs:
     # The full gate runs before the model calls, which are the only part of the
     # run that costs money.
     ci:
+        # A dispatch from another branch would run that branch's script with the
+        # inference and bucket keys.
+        if: github.ref == 'refs/heads/main'
         uses: ./.github/workflows/ci.yml
 
     generate:
         needs: ci
         runs-on: ubuntu-latest
+        # A normal run takes about two minutes; the default is six hours.
+        timeout-minutes: 30
         permissions:
             contents: read
         steps:
@@ -58,4 +63,14 @@ jobs:
     publish:
         needs: generate
         uses: ./.github/workflows/deploy.yml
-        secrets: inherit
+        # A called workflow cannot raise the caller's token scopes, and the
+        # repository default is read-only; the deploy's alert job opens issues.
+        permissions:
+            contents: read
+            issues: write
+        # Only what the deploy needs; the inference and bucket keys stay here.
+        secrets:
+            DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
+            DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
+            DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+            DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}
