@@ -4,13 +4,13 @@ on:
     workflow_dispatch:
         inputs:
             since:
-                description: 'ISO date-time with Z or offset, e.g. 2026-11-10T06:00:00Z (optional)'
+                description: 'Backfill start: ISO date-time with Z or offset, e.g. 2026-11-10T06:00:00Z; pass with until'
                 required: false
             until:
-                description: 'ISO date-time with Z or offset, at most 14 days after since, not in the future (optional)'
+                description: 'Backfill end: ISO date-time with Z or offset, at most 14 days after since, not in the future; pass with since'
                 required: false
             week:
-                description: 'Week label, YYYY-MM-DD; must be the Istanbul date the window ends (optional)'
+                description: 'Optional check: YYYY-MM-DD, must be the Istanbul date the window ends on'
                 required: false
 
 concurrency:

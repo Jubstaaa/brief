@@ -41,6 +41,12 @@ invalid file fails the build instead of deploying a site with weeks missing, so 
 bucket needs one `bun run generate` before the first deploy. `publish` checks the new week and
 every stored week before it writes anything.
 
+When a build or a weekly run fails on the archive, the error starts with the bucket key
+(`weeks/2026-11-17.json: …`). Fix that object in the bucket, or delete it and run
+`bun run generate` (or the weekly workflow) so `index.json` is rebuilt without it. If only the
+deploy of a weekly run failed (for example a Spaces timeout), use "Re-run failed jobs": that
+repeats the build and deploy without calling the model again.
+
 ## Commands
 
 ```bash
