@@ -8,6 +8,7 @@ import {
     subWeeks,
 } from 'date-fns'
 import { tr } from 'date-fns/locale'
+import { z } from 'zod'
 
 export interface BriefWindow {
     since: string
@@ -45,6 +46,44 @@ export function resolveWindow(now: Date): BriefWindow {
         until: toUtcIso(until),
         week: format(until, 'yyyy-MM-dd'),
     }
+}
+
+const isoInstant = z.iso
+    .datetime({ offset: true })
+    .transform(value => toUtcIso(new Date(value)))
+
+// The week label becomes the bucket key weeks/<week>.json and a page URL, so
+// it must be a plain date; overrides come from workflow_dispatch inputs.
+const windowOptionsSchema = z.object({
+    since: isoInstant.optional(),
+    until: isoInstant.optional(),
+    week: z.iso.date().optional(),
+})
+
+export type WindowOptions = z.input<typeof windowOptionsSchema>
+
+export function windowFromOptions(
+    options: WindowOptions,
+    now: Date
+): BriefWindow {
+    const parsed = windowOptionsSchema.safeParse(options)
+
+    if (!parsed.success) throw new Error(z.prettifyError(parsed.error))
+
+    const resolved = resolveWindow(now)
+    const window = {
+        since: parsed.data.since ?? resolved.since,
+        until: parsed.data.until ?? resolved.until,
+        week: parsed.data.week ?? resolved.week,
+    }
+
+    if (window.since >= window.until) {
+        throw new Error(
+            `since must be before until (${window.since} >= ${window.until})`
+        )
+    }
+
+    return window
 }
 
 export function formatRange(since: string, until: string): string {

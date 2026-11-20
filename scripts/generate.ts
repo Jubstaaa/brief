@@ -1,7 +1,7 @@
 import { Command } from 'commander'
 import { consola } from 'consola'
 
-import { resolveWindow } from '@/lib/window'
+import { windowFromOptions } from '@/lib/window'
 import { run } from '@/pipeline/run'
 
 new Command()
@@ -14,16 +14,12 @@ new Command()
     .option('--until <iso>', 'override the end of the window')
     .option('--week <date>', 'override the week label (YYYY-MM-DD)')
     .action(async options => {
-        const resolved = resolveWindow(new Date())
-
-        await run(
-            {
-                since: options.since ?? resolved.since,
-                until: options.until ?? resolved.until,
-                week: options.week ?? resolved.week,
-            },
-            options.dryRun
+        const window = windowFromOptions(
+            { since: options.since, until: options.until, week: options.week },
+            new Date()
         )
+
+        await run(window, options.dryRun)
     })
     .parseAsync()
     .catch(error => {
