@@ -2,7 +2,6 @@ import js from '@eslint/js'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import nextTypescript from 'eslint-config-next/typescript'
 import prettierConfig from 'eslint-config-prettier'
-import importPlugin from 'eslint-plugin-import'
 import perfectionistPlugin from 'eslint-plugin-perfectionist'
 import prettierPlugin from 'eslint-plugin-prettier'
 import reactPlugin from 'eslint-plugin-react'
@@ -18,7 +17,6 @@ export default tseslint.config(
     {
         files: ['**/*.{ts,tsx,mjs}'],
         plugins: {
-            import: importPlugin,
             perfectionist: perfectionistPlugin,
             prettier: prettierPlugin,
             react: reactPlugin,
@@ -28,51 +26,38 @@ export default tseslint.config(
             '@typescript-eslint/no-empty-object-type': 'off',
             '@typescript-eslint/no-unused-expressions': 'off',
             '@typescript-eslint/no-unused-vars': 'off',
-            'import/order': [
-                'error',
-                {
-                    'alphabetize': { caseInsensitive: true, order: 'asc' },
-                    'groups': [
-                        'builtin',
-                        'external',
-                        'internal',
-                        'parent',
-                        'sibling',
-                        'index',
-                    ],
-                    'newlines-between': 'always',
-                    'pathGroups': [
-                        {
-                            group: 'external',
-                            pattern: 'react',
-                            position: 'before',
-                        },
-                        {
-                            group: 'external',
-                            pattern: 'react-*',
-                            position: 'before',
-                        },
-                        {
-                            group: 'external',
-                            pattern: 'next',
-                            position: 'before',
-                        },
-                        {
-                            group: 'external',
-                            pattern: 'next/**',
-                            position: 'before',
-                        },
-                        {
-                            group: 'internal',
-                            pattern: '@/**',
-                            position: 'after',
-                        },
-                    ],
-                    'pathGroupsExcludedImportTypes': ['react', 'next'],
-                },
-            ],
             'no-console': ['warn', { allow: ['error'] }],
             'no-unused-vars': 'error',
+            'perfectionist/sort-imports': [
+                'error',
+                {
+                    customGroups: [
+                        {
+                            elementNamePattern: [
+                                '^react$',
+                                '^react-.+',
+                                '^next$',
+                                '^next/.+',
+                            ],
+                            groupName: 'framework',
+                        },
+                    ],
+                    environment: 'bun',
+                    groups: [
+                        'builtin',
+                        'framework',
+                        'external',
+                        'internal',
+                        ['parent', 'sibling', 'index'],
+                        'unknown',
+                    ],
+                    ignoreCase: true,
+                    internalPattern: ['^@/.+'],
+                    newlinesBetween: 1,
+                    order: 'asc',
+                    type: 'alphabetical',
+                },
+            ],
             'perfectionist/sort-interfaces': [
                 'error',
                 {
@@ -145,7 +130,7 @@ export default tseslint.config(
     },
 
     {
-        files: ['**/*.types.ts', '**/*.types.tsx', '**/*.d.ts'],
+        files: ['**/*.d.ts'],
         rules: { 'no-unused-vars': 'off' },
     },
 
