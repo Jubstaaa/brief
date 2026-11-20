@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, mock, test } from 'bun:test'
+import type { z } from 'zod'
 
 import { briefSchema } from '@/lib/brief'
 import type { PullDetail } from '@/pipeline/github/pulls'
@@ -87,16 +88,11 @@ describe('draft', () => {
 
     test('keeps the item but drops a code sample the site could not render', async () => {
         // complete() parses the model's JSON with the schema it is given.
-        complete.mockImplementation(
-            async ({
-                schema,
-            }: {
-                schema: { parse: (v: unknown) => unknown }
-            }) =>
-                schema.parse({
-                    ...written,
-                    code: { lang: 'shell session', snippet: 'x' },
-                })
+        complete.mockImplementation(async ({ schema }: { schema: z.ZodType }) =>
+            schema.parse({
+                ...written,
+                code: { lang: 'shell session', snippet: 'x' },
+            })
         )
 
         const items = await draft({ picks: [pick(1)] }, [detail(1)])

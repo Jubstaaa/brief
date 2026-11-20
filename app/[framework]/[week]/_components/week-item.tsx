@@ -1,3 +1,5 @@
+import { toMarkdown } from 'mdast-util-to-markdown'
+
 import type { BriefItem, BriefKind } from '@/lib/brief'
 
 import Prose from './prose'
@@ -35,11 +37,11 @@ export default function WeekItem({ item, ordinal }: WeekItemProps) {
 
             {item.code && (
                 <Prose
-                    content={[
-                        '```' + item.code.lang,
-                        item.code.snippet,
-                        '```',
-                    ].join('\n')}
+                    content={toMarkdown({
+                        lang: item.code.lang,
+                        type: 'code',
+                        value: item.code.snippet,
+                    })}
                 />
             )}
 
