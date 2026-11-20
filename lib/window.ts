@@ -52,8 +52,8 @@ const isoInstant = z.iso
     .datetime({ offset: true })
     .transform(value => toUtcIso(new Date(value)))
 
-// The week label becomes the bucket key weeks/<week>.json and a page URL, so
-// it must be a plain date; overrides come from workflow_dispatch inputs.
+// Overrides come from workflow_dispatch inputs. The week label becomes the
+// bucket key weeks/<week>.json and a page URL, so it must be a plain date.
 const windowOptionsSchema = z.object({
     since: isoInstant.optional(),
     until: isoInstant.optional(),
@@ -71,19 +71,23 @@ export function windowFromOptions(
     if (!parsed.success) throw new Error(z.prettifyError(parsed.error))
 
     const resolved = resolveWindow(now)
-    const window = {
-        since: parsed.data.since ?? resolved.since,
-        until: parsed.data.until ?? resolved.until,
-        week: parsed.data.week ?? resolved.week,
+    const since = parsed.data.since ?? resolved.since
+    const until = parsed.data.until ?? resolved.until
+    // The label names the bucket key, so it must be the week the window
+    // ends in; a free label would overwrite another week's file.
+    const week = format(inZone(new Date(until)), 'yyyy-MM-dd')
+
+    if (since >= until) {
+        throw new Error(`since must be before until (${since} >= ${until})`)
     }
 
-    if (window.since >= window.until) {
+    if (parsed.data.week !== undefined && parsed.data.week !== week) {
         throw new Error(
-            `since must be before until (${window.since} >= ${window.until})`
+            `week ${parsed.data.week} does not match the window ending ${week}`
         )
     }
 
-    return window
+    return { since, until, week }
 }
 
 export function formatRange(since: string, until: string): string {

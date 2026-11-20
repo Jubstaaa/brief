@@ -10,7 +10,7 @@ on:
                 description: 'ISO end of window (optional)'
                 required: false
             week:
-                description: 'Week label, YYYY-MM-DD (optional)'
+                description: 'Week label, YYYY-MM-DD; must be the Istanbul date the window ends (optional)'
                 required: false
 
 concurrency:

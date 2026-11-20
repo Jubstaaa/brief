@@ -14,12 +14,12 @@ new Command()
     .option('--until <iso>', 'override the end of the window')
     .option('--week <date>', 'override the week label (YYYY-MM-DD)')
     .action(async options => {
-        const window = windowFromOptions(
+        const briefWindow = windowFromOptions(
             { since: options.since, until: options.until, week: options.week },
             new Date()
         )
 
-        await run(window, options.dryRun)
+        await run(briefWindow, options.dryRun)
     })
     .parseAsync()
     .catch(error => {

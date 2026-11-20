@@ -92,6 +92,24 @@ describe('windowFromOptions', () => {
         })
     })
 
+    test('labels an overridden window by the Istanbul date it ends on', () => {
+        expect(
+            windowFromOptions(
+                {
+                    since: '2026-07-07T06:00:00Z',
+                    until: '2026-07-14T06:00:00Z',
+                },
+                now
+            ).week
+        ).toBe('2026-07-14')
+    })
+
+    test('rejects a week label that does not match the window, since it would overwrite that week', () => {
+        expect(() => windowFromOptions({ week: '2026-07-21' }, now)).toThrow(
+            'week 2026-07-21 does not match the window ending 2026-07-28'
+        )
+    })
+
     test('rejects a week label that is not a date, since it becomes a bucket key', () => {
         expect(() => windowFromOptions({ week: '../index' }, now)).toThrow(
             'week'
