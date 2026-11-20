@@ -23,6 +23,9 @@ export interface WeekPageProps {
     params: Promise<{ framework: string; week: string }>
 }
 
+// Only weeks listed in the index exist; anything else is a 404, in dev too.
+export const dynamicParams = false
+
 export function generateStaticParams() {
     return readWeekParams()
 }

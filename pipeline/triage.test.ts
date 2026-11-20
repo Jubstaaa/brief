@@ -4,7 +4,10 @@ import type { Commit, RepoCommits } from '@/pipeline/github/commits'
 
 const complete = mock()
 
-mock.module('./inference/client', () => ({ complete }))
+// mock.module replaces the module for every importer in the run, so keep its
+// other exports.
+const client = await import('./inference/client')
+mock.module('./inference/client', () => ({ ...client, complete }))
 
 const { triage } = await import('./triage')
 
