@@ -68,8 +68,8 @@ bun run type-check
 spending a token.
 
 `--since` and `--until` take ISO date-times with seconds and a `Z` or `±HH:MM` offset
-(`2026-07-21T06:00:00Z`, `2026-07-21T09:00:00+03:00`) and are stored in UTC. An option you
-leave out falls back to the current week, so a backfill passes both. The window may be at most
+(`2026-07-21T06:00:00Z`, `2026-07-21T09:00:00+03:00`) and are stored in UTC. A backfill passes both
+together; leaving both out runs the current week. The window may be at most
 14 days and cannot end in the future. The week label is always the Istanbul date the window
 ends on; `--week` is optional and only has to match it, so a typo cannot overwrite another
 week's file.

@@ -57,11 +57,19 @@ const isoInstant = z.iso
 // Overrides come from the CLI (workflow_dispatch inputs or a local backfill).
 // The week label becomes the bucket key weeks/<week>.json and a page URL, so
 // it must be a plain date.
-const windowOptionsSchema = z.object({
-    since: isoInstant.optional(),
-    until: isoInstant.optional(),
-    week: z.iso.date().optional(),
-})
+// A one-sided override would silently borrow the other bound from the
+// scheduled window, so a backfill passes both.
+const windowOptionsSchema = z
+    .object({
+        since: isoInstant.optional(),
+        until: isoInstant.optional(),
+        week: z.iso.date().optional(),
+    })
+    .refine(
+        options =>
+            (options.since === undefined) === (options.until === undefined),
+        { message: '--since and --until must be passed together' }
+    )
 
 // Every commit in the window goes through triage, so a typo in a manual
 // backfill (2016 instead of 2026) would run up the model bill.

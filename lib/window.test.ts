@@ -124,19 +124,37 @@ describe('windowFromOptions', () => {
 
     test('rejects a window longer than two weeks, which would triage years of commits', () => {
         expect(() =>
-            windowFromOptions({ since: '2016-07-21T06:00:00Z' }, now)
+            windowFromOptions(
+                {
+                    since: '2016-07-21T06:00:00Z',
+                    until: '2026-07-28T06:00:00Z',
+                },
+                now
+            )
         ).toThrow('longer than 14 days')
     })
 
     test('rejects a window just over 14 days long', () => {
         expect(() =>
-            windowFromOptions({ since: '2026-07-14T05:59:00Z' }, now)
+            windowFromOptions(
+                {
+                    since: '2026-07-14T05:59:00Z',
+                    until: '2026-07-28T06:00:00Z',
+                },
+                now
+            )
         ).toThrow('longer than 14 days')
     })
 
     test('accepts a window of exactly 14 days', () => {
         expect(
-            windowFromOptions({ since: '2026-07-14T06:00:00Z' }, now).since
+            windowFromOptions(
+                {
+                    since: '2026-07-14T06:00:00Z',
+                    until: '2026-07-28T06:00:00Z',
+                },
+                now
+            ).since
         ).toBe('2026-07-14T06:00:00.000Z')
     })
 
@@ -166,7 +184,13 @@ describe('windowFromOptions', () => {
 
     test('rejects a window that ends a millisecond from now', () => {
         expect(() =>
-            windowFromOptions({ until: '2026-07-28T06:00:00.001Z' }, now)
+            windowFromOptions(
+                {
+                    since: '2026-07-21T06:00:00Z',
+                    until: '2026-07-28T06:00:00.001Z',
+                },
+                now
+            )
         ).toThrow('in the future')
     })
 
@@ -200,9 +224,27 @@ describe('windowFromOptions', () => {
         ).toThrow('since must be before until')
     })
 
+    test.each([
+        ['since', { since: '2026-07-24T06:00:00Z' }],
+        ['until', { until: '2026-07-24T06:00:00Z' }],
+    ])(
+        'rejects a backfill with only %s, which would mix in the scheduled window',
+        (_, options) => {
+            expect(() => windowFromOptions(options, now)).toThrow(
+                '--since and --until must be passed together'
+            )
+        }
+    )
+
     test('rejects a window that ends before it starts', () => {
         expect(() =>
-            windowFromOptions({ since: '2026-07-29T00:00:00Z' }, now)
+            windowFromOptions(
+                {
+                    since: '2026-07-29T00:00:00Z',
+                    until: '2026-07-28T06:00:00Z',
+                },
+                now
+            )
         ).toThrow('since must be before until')
     })
 })
