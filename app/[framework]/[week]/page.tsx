@@ -4,7 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
 import JsonLd from '@/components/json-ld'
-import { readArchive, readBrief } from '@/lib/archive'
+import { readBrief, readWeekParams } from '@/lib/archive'
 import type { Release } from '@/lib/brief'
 import { OG_SIZE, ogImagePath } from '@/lib/og'
 import { findRepoBySlug } from '@/lib/repos'
@@ -23,15 +23,8 @@ export interface WeekPageProps {
     params: Promise<{ framework: string; week: string }>
 }
 
-export async function generateStaticParams() {
-    const entries = await readArchive()
-
-    return entries.flatMap(entry =>
-        entry.frameworks.map(framework => ({
-            framework: framework.slug,
-            week: entry.week,
-        }))
-    )
+export function generateStaticParams() {
+    return readWeekParams()
 }
 
 async function load(params: WeekPageProps['params']) {
@@ -41,8 +34,6 @@ async function load(params: WeekPageProps['params']) {
     if (!config) return undefined
 
     const brief = await readBrief(week)
-
-    if (!brief) return undefined
 
     const items = brief.items.filter(item => item.repo === config.label)
 

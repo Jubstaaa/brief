@@ -1,3 +1,5 @@
+import { z } from 'zod'
+
 export const BRIEF_KINDS = [
     'breaking',
     'feature',
@@ -8,71 +10,96 @@ export const BRIEF_KINDS = [
 
 export type BriefKind = (typeof BRIEF_KINDS)[number]
 
-export interface Release {
-    label: string
-    publishedAt: string
-    tag: string
-    url: string
-}
+// The archive lives in a public bucket and its links end up in href
+// attributes, so only https links are accepted.
+const httpsUrl = z.url({ protocol: /^https$/ })
 
-interface BriefCode {
-    lang: string
-    snippet: string
-}
+const releaseSchema = z.object({
+    label: z.string(),
+    publishedAt: z.iso.datetime(),
+    tag: z.string(),
+    url: httpsUrl,
+})
 
-export interface BriefItem {
-    action: string
-    code?: BriefCode | null
-    detail: string
-    headline: string
-    kind: BriefKind
-    pr: number
-    repo: string
-}
+export type Release = z.infer<typeof releaseSchema>
 
-interface BriefCount {
-    kept: number
-    label: string
-    total: number
-}
+const briefItemSchema = z.object({
+    action: z.string(),
+    code: z.object({ lang: z.string(), snippet: z.string() }).nullable(),
+    detail: z.string(),
+    headline: z.string(),
+    kind: z.enum(BRIEF_KINDS),
+    pr: z.number().int().positive(),
+    repo: z.string(),
+})
 
-interface BriefCommit {
-    repo: string
-    title: string
-    url: string
-}
+export type BriefItem = z.infer<typeof briefItemSchema>
 
-export interface BriefUsage {
-    calls: number
-    costUsd?: number
-    inputTokens: number
-    outputTokens: number
-}
+const briefUsageSchema = z.object({
+    calls: z.number().int().nonnegative(),
+    costUsd: z.number().nonnegative().optional(),
+    inputTokens: z.number().int().nonnegative(),
+    outputTokens: z.number().int().nonnegative(),
+})
 
-export interface Brief {
-    commits: BriefCommit[]
-    counts: BriefCount[]
-    generatedAt: string
-    items: BriefItem[]
-    model: string
-    quiet: boolean
-    releases: Release[]
-    since: string
-    until: string
-    usage: BriefUsage
-    week: string
-}
+export type BriefUsage = z.infer<typeof briefUsageSchema>
 
-export interface ArchiveFramework {
-    itemCount: number
-    slug: string
-}
+export const briefSchema = z.object({
+    commits: z.array(
+        z.object({ repo: z.string(), title: z.string(), url: httpsUrl })
+    ),
+    counts: z.array(
+        z.object({
+            kept: z.number().int().nonnegative(),
+            label: z.string(),
+            total: z.number().int().nonnegative(),
+        })
+    ),
+    generatedAt: z.iso.datetime(),
+    items: z.array(briefItemSchema),
+    model: z.string(),
+    quiet: z.boolean(),
+    releases: z.array(releaseSchema),
+    since: z.iso.datetime(),
+    until: z.iso.datetime(),
+    usage: briefUsageSchema,
+    week: z.iso.date(),
+})
 
-export interface ArchiveEntry {
-    frameworks: ArchiveFramework[]
-    itemCount: number
-    since: string
-    total: number
-    until: string
-    week: string
+export type Brief = z.infer<typeof briefSchema>
+
+const archiveFrameworkSchema = z.object({
+    itemCount: z.number().int().nonnegative(),
+    slug: z.string(),
+})
+
+export type ArchiveFramework = z.infer<typeof archiveFrameworkSchema>
+
+export const archiveSchema = z.array(
+    z.object({
+        frameworks: z.array(archiveFrameworkSchema),
+        itemCount: z.number().int().nonnegative(),
+        since: z.iso.datetime(),
+        total: z.number().int().nonnegative(),
+        until: z.iso.datetime(),
+        week: z.iso.date(),
+    })
+)
+
+export type ArchiveEntry = z.infer<typeof archiveSchema>[number]
+
+// Names the bucket key in the error, so a failed build or run points at the
+// file to fix.
+export function parseStored<T extends z.ZodType>(
+    schema: T,
+    key: string,
+    value: unknown
+): z.infer<T> {
+    const result = schema.safeParse(value)
+
+    if (!result.success) {
+        throw new Error(`${key}: ${z.prettifyError(result.error)}`)
+    }
+
+    return result.data
 }
