@@ -5,10 +5,10 @@ import prettierConfig from 'eslint-config-prettier'
 import perfectionistPlugin from 'eslint-plugin-perfectionist'
 import prettierPlugin from 'eslint-plugin-prettier'
 import reactPlugin from 'eslint-plugin-react'
-import tseslint from 'typescript-eslint'
+import { defineConfig, globalIgnores } from 'eslint/config'
 
-export default tseslint.config(
-    { ignores: ['node_modules', '.next', 'out', 'next-env.d.ts'] },
+export default defineConfig([
+    globalIgnores(['.next', 'out', 'next-env.d.ts']),
 
     js.configs.recommended,
     ...nextVitals,
@@ -25,9 +25,11 @@ export default tseslint.config(
             '@typescript-eslint/consistent-type-imports': 'error',
             '@typescript-eslint/no-empty-object-type': 'off',
             '@typescript-eslint/no-unused-expressions': 'off',
-            '@typescript-eslint/no-unused-vars': 'off',
+            // Core no-unused-vars cannot read TypeScript types: the parameter
+            // name in `(ms: number) => void` reads as an unused `ms`.
+            '@typescript-eslint/no-unused-vars': 'error',
             'no-console': ['warn', { allow: ['error'] }],
-            'no-unused-vars': 'error',
+            'no-unused-vars': 'off',
             'perfectionist/sort-imports': [
                 'error',
                 {
@@ -130,14 +132,9 @@ export default tseslint.config(
     },
 
     {
-        files: ['**/*.d.ts'],
-        rules: { 'no-unused-vars': 'off' },
-    },
-
-    {
         files: ['pipeline/**', 'scripts/**'],
         rules: { 'no-console': 'off' },
     },
 
-    prettierConfig
-)
+    prettierConfig,
+])
