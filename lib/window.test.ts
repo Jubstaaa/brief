@@ -122,6 +122,24 @@ describe('windowFromOptions', () => {
         )
     })
 
+    test('rejects a window longer than two weeks, which would triage years of commits', () => {
+        expect(() =>
+            windowFromOptions({ since: '2016-07-21T06:00:00Z' }, now)
+        ).toThrow('longer than 14 days')
+    })
+
+    test('rejects a window that ends in the future', () => {
+        expect(() =>
+            windowFromOptions(
+                {
+                    since: '2026-07-28T06:00:00Z',
+                    until: '2026-08-04T06:00:00Z',
+                },
+                now
+            )
+        ).toThrow('in the future')
+    })
+
     test('rejects a window that ends before it starts', () => {
         expect(() =>
             windowFromOptions({ since: '2026-07-29T00:00:00Z' }, now)

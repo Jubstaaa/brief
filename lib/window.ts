@@ -1,6 +1,7 @@
 import { TZDate } from '@date-fns/tz'
 import {
     addHours,
+    differenceInDays,
     format,
     isTuesday,
     previousTuesday,
@@ -60,6 +61,10 @@ const windowOptionsSchema = z.object({
     week: z.iso.date().optional(),
 })
 
+// Every commit in the window goes through triage, so a typo in a manual
+// backfill (2016 instead of 2026) would run up the model bill.
+const MAX_WINDOW_DAYS = 14
+
 export type WindowOptions = z.input<typeof windowOptionsSchema>
 
 export function windowFromOptions(
@@ -79,6 +84,16 @@ export function windowFromOptions(
 
     if (since >= until) {
         throw new Error(`since must be before until (${since} >= ${until})`)
+    }
+
+    if (differenceInDays(new Date(until), new Date(since)) > MAX_WINDOW_DAYS) {
+        throw new Error(
+            `the window is longer than ${MAX_WINDOW_DAYS} days (${since} -> ${until})`
+        )
+    }
+
+    if (new Date(until) > now) {
+        throw new Error(`until ${until} is in the future`)
     }
 
     if (parsed.data.week !== undefined && parsed.data.week !== week) {
