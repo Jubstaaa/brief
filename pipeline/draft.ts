@@ -67,13 +67,16 @@ export async function draft(
     triaged: Triage,
     details: PullDetail[]
 ): Promise<BriefItem[]> {
-    const byPr = new Map(details.map(detail => [detail.number, detail]))
+    // PR numbers repeat across repos, so a detail is found by repo and number.
+    const byPull = new Map(
+        details.map(detail => [`${detail.label}#${detail.number}`, detail])
+    )
 
     const items = compact(
         await Promise.all(
             compact(
                 triaged.picks.map(pick => {
-                    const detail = byPr.get(pick.pr)
+                    const detail = byPull.get(`${pick.repo}#${pick.pr}`)
                     return detail ? { detail, pick } : undefined
                 })
             ).map(({ detail, pick }) => draftOne(pick, detail))

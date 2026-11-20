@@ -14,19 +14,19 @@ mock.module('@/pipeline/inference/client', () => ({ ...client, complete }))
 
 const { draft } = await import('./draft')
 
-function pick(pr: number): TriagePick {
-    return { kind: 'feature', pr, reason: 'relevant', repo: 'react' }
+function pick(pr: number, repo = 'react'): TriagePick {
+    return { kind: 'feature', pr, reason: 'relevant', repo }
 }
 
-function detail(pr: number): PullDetail {
+function detail(pr: number, label = 'react'): PullDetail {
     return {
         body: '',
         files: [],
-        label: 'react',
+        label,
         labels: [],
         number: pr,
-        title: `PR ${pr}`,
-        url: `https://github.com/facebook/react/pull/${pr}`,
+        title: `${label} PR ${pr}`,
+        url: `https://github.com/example/${label}/pull/${pr}`,
     }
 }
 
@@ -71,11 +71,27 @@ describe('draft', () => {
         expect(items.map(item => item.pr)).toEqual([2])
     })
 
+    test('drafts each pick from its own repo when two repos share a PR number', async () => {
+        complete.mockResolvedValue(written)
+
+        await draft({ picks: [pick(7, 'expo')] }, [
+            detail(7, 'expo'),
+            detail(7, 'react'),
+        ])
+
+        const prompt = String(complete.mock.calls[0]?.[0]?.user)
+        expect(prompt).toContain('expo PR 7')
+        expect(prompt).not.toContain('react PR 7')
+    })
+
     test('keeps at most MAX_CODE_BLOCKS code samples per repo', async () => {
         complete.mockResolvedValue(written)
         const prs = Array.from({ length: MAX_CODE_BLOCKS + 2 }, (_, i) => i + 1)
 
-        const items = await draft({ picks: prs.map(pick) }, prs.map(detail))
+        const items = await draft(
+            { picks: prs.map(pr => pick(pr)) },
+            prs.map(pr => detail(pr))
+        )
 
         expect(items.filter(item => item.code).length).toBe(MAX_CODE_BLOCKS)
     })
