@@ -2,14 +2,13 @@ import js from '@eslint/js'
 import nextVitals from 'eslint-config-next/core-web-vitals'
 import nextTypescript from 'eslint-config-next/typescript'
 import prettierConfig from 'eslint-config-prettier'
-import importPlugin from 'eslint-plugin-import'
 import perfectionistPlugin from 'eslint-plugin-perfectionist'
 import prettierPlugin from 'eslint-plugin-prettier'
 import reactPlugin from 'eslint-plugin-react'
-import tseslint from 'typescript-eslint'
+import { defineConfig, globalIgnores } from 'eslint/config'
 
-export default tseslint.config(
-    { ignores: ['node_modules', '.next', 'out', 'next-env.d.ts'] },
+export default defineConfig([
+    globalIgnores(['.next', 'out', 'next-env.d.ts']),
 
     js.configs.recommended,
     ...nextVitals,
@@ -18,7 +17,6 @@ export default tseslint.config(
     {
         files: ['**/*.{ts,tsx,mjs}'],
         plugins: {
-            import: importPlugin,
             perfectionist: perfectionistPlugin,
             prettier: prettierPlugin,
             react: reactPlugin,
@@ -27,52 +25,41 @@ export default tseslint.config(
             '@typescript-eslint/consistent-type-imports': 'error',
             '@typescript-eslint/no-empty-object-type': 'off',
             '@typescript-eslint/no-unused-expressions': 'off',
-            '@typescript-eslint/no-unused-vars': 'off',
-            'import/order': [
+            // Core no-unused-vars cannot read TypeScript types: the parameter
+            // name in `(ms: number) => void` reads as an unused `ms`.
+            '@typescript-eslint/no-unused-vars': 'error',
+            'no-console': ['warn', { allow: ['error'] }],
+            'no-unused-vars': 'off',
+            'perfectionist/sort-imports': [
                 'error',
                 {
-                    'alphabetize': { caseInsensitive: true, order: 'asc' },
-                    'groups': [
+                    customGroups: [
+                        {
+                            elementNamePattern: [
+                                '^react$',
+                                '^react-.+',
+                                '^next$',
+                                '^next/.+',
+                            ],
+                            groupName: 'framework',
+                        },
+                    ],
+                    environment: 'bun',
+                    groups: [
                         'builtin',
+                        'framework',
                         'external',
                         'internal',
-                        'parent',
-                        'sibling',
-                        'index',
+                        ['parent', 'sibling', 'index'],
+                        'unknown',
                     ],
-                    'newlines-between': 'always',
-                    'pathGroups': [
-                        {
-                            group: 'external',
-                            pattern: 'react',
-                            position: 'before',
-                        },
-                        {
-                            group: 'external',
-                            pattern: 'react-*',
-                            position: 'before',
-                        },
-                        {
-                            group: 'external',
-                            pattern: 'next',
-                            position: 'before',
-                        },
-                        {
-                            group: 'external',
-                            pattern: 'next/**',
-                            position: 'before',
-                        },
-                        {
-                            group: 'internal',
-                            pattern: '@/**',
-                            position: 'after',
-                        },
-                    ],
-                    'pathGroupsExcludedImportTypes': ['react', 'next'],
+                    ignoreCase: true,
+                    internalPattern: ['^@/.+'],
+                    newlinesBetween: 1,
+                    order: 'asc',
+                    type: 'alphabetical',
                 },
             ],
-            'no-console': ['warn', { allow: ['error'] }],
-            'no-unused-vars': 'error',
             'perfectionist/sort-interfaces': [
                 'error',
                 {
@@ -145,14 +132,9 @@ export default tseslint.config(
     },
 
     {
-        files: ['**/*.types.ts', '**/*.types.tsx', '**/*.d.ts'],
-        rules: { 'no-unused-vars': 'off' },
-    },
-
-    {
         files: ['pipeline/**', 'scripts/**'],
         rules: { 'no-console': 'off' },
     },
 
-    prettierConfig
-)
+    prettierConfig,
+])
