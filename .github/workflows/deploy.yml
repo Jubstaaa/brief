@@ -83,9 +83,17 @@ jobs:
                   TITLE: Production deploy failed
               run: |
                   body="Run: $RUN_URL (commit $GITHUB_SHA). Production may be on the previous release or down; check the deploy log."
-                  existing=$(gh issue list --state open --search "\"$TITLE\" in:title" --json number --jq '.[0].number // empty')
+                  # Anyone can open an issue on this public repository, so only
+                  # an issue this workflow created counts; gh reports the bot's
+                  # login as app/github-actions.
+                  gh label create deploy-failure --force --color B60205 \
+                      --description 'Opened by the deploy workflow'
+                  existing=$(gh issue list --state open --author app/github-actions \
+                      --label deploy-failure --search "\"$TITLE\" in:title" \
+                      --json number,author \
+                      --jq '[.[] | select(.author.is_bot and .author.login == "app/github-actions")][0].number // empty')
                   if [ -n "$existing" ]; then
                       gh issue comment "$existing" --body "$body"
                   else
-                      gh issue create --title "$TITLE" --body "$body"
+                      gh issue create --title "$TITLE" --body "$body" --label deploy-failure
                   fi
