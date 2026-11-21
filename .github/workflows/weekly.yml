@@ -28,6 +28,9 @@ jobs:
 
     generate:
         needs: ci
+        # The inference and bucket keys live in this environment, which only
+        # accepts main.
+        environment: weekly
         runs-on: ubuntu-latest
         # A normal run takes about two minutes; the default is six hours.
         timeout-minutes: 30
@@ -68,9 +71,3 @@ jobs:
         permissions:
             contents: read
             issues: write
-        # Only what the deploy needs; the inference and bucket keys stay here.
-        secrets:
-            DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-            DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-            DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-            DEPLOY_KNOWN_HOSTS: ${{ secrets.DEPLOY_KNOWN_HOSTS }}

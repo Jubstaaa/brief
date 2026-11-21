@@ -4,16 +4,9 @@ on:
     push:
         branches: [main]
     workflow_dispatch:
+    # The deploy secrets live in the production environment, which the job
+    # below names, so a caller passes none.
     workflow_call:
-        secrets:
-            DEPLOY_HOST:
-                required: true
-            DEPLOY_USER:
-                required: true
-            DEPLOY_SSH_KEY:
-                required: true
-            DEPLOY_KNOWN_HOSTS:
-                required: true
 
 permissions:
     contents: read
