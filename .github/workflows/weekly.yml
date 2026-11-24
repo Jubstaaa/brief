@@ -85,4 +85,13 @@ jobs:
                   run_id=${url##*/}
                   [[ "$run_id" =~ ^[0-9]+$ ]] || { echo "no run id in: $url" >&2; exit 1; }
                   echo "Deploy run: $url"
-                  gh run watch "$run_id" --exit-status --interval 10
+                  # gh run watch asks for the jobs of a run that is only seconds
+                  # old and gets a 404, so poll the run itself.
+                  for _ in $(seq 1 120); do
+                      state=$(gh run view "$run_id" --json status,conclusion \
+                          --jq '"\(.status) \(.conclusion)"' || true)
+                      case "$state" in completed*) break ;; esac
+                      sleep 15
+                  done
+                  echo "Deploy run finished: $state"
+                  [ "$state" = "completed success" ]
