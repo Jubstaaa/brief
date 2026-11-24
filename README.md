@@ -45,7 +45,7 @@ When a build or a weekly run fails on the archive, the error starts with the buc
 (`weeks/2026-11-17.json: …`). Fix that object in the bucket, or delete it and run
 `bun run generate` (or the weekly workflow) so `index.json` is rebuilt without it. If only the
 deploy of a weekly run failed (for example a Spaces timeout), use "Re-run failed jobs": that
-repeats the build and deploy without calling the model again.
+dispatches the deploy again without calling the model again.
 
 ## Commands
 
@@ -99,14 +99,17 @@ Spaces and ships `out/` to the box where Caddy serves it through
 answering). It runs no gate of its own: `main` only accepts commits whose required `check`
 passed on a branch that was up to date with it. It runs on every push to `main`, so a code
 change ships without regenerating a brief; on a manual dispatch, which redeploys `main` and
-nothing else; and after a Dependabot auto-merge, which dispatches it because a bot merge
-starts no push workflow. The deploy job runs in the `production` environment, which only
+nothing else; after a Dependabot auto-merge, which dispatches it because a bot merge
+starts no push workflow; and from `weekly.yml` once it has published the week. The deploy job runs in the `production` environment, which only
 accepts `main`. A failed deploy on `main` opens (or comments on) a "Production deploy failed"
 issue. Pull requests get the checks and stop there. No container, no app server — just files.
 
-`weekly.yml` runs the same gate, publishes that week's JSON to Spaces and then calls
-`deploy.yml` to render and ship it. The build always happens on a runner, never on the box, which has under 300 MB of
-RAM to spare.
+`weekly.yml` runs the same gate, publishes that week's JSON to Spaces and then dispatches
+`deploy.yml` (the deploy secrets live in the `production` environment, which a called workflow
+does not receive) and waits for that run to render and ship it. If a newer deploy supersedes
+the queued one, GitHub cancels it and the weekly run turns red although the site is up to date;
+check the newest Deploy run before re-running. The build always happens on a runner, never on
+the box, which has under 300 MB of RAM to spare.
 
 The workflow has no `schedule` trigger. GitHub disables scheduled workflows after 60 days
 without a commit and this repository can go quiet for longer than that, so the timer lives

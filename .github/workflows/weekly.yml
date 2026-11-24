@@ -63,11 +63,26 @@ jobs:
                   [ -n "$WEEK" ] && args+=("--week=$WEEK")
                   bun run scripts/generate.ts "${args[@]}"
 
+    # The deploy secrets live in the production environment, and a called
+    # workflow does not receive them, so the deploy runs as its own workflow
+    # run and this job waits for it. Its alert job opens the failure issue.
     publish:
         needs: generate
-        uses: ./.github/workflows/deploy.yml
-        # A called workflow cannot raise the caller's token scopes, and the
-        # repository default is read-only; the deploy's alert job opens issues.
+        runs-on: ubuntu-latest
+        timeout-minutes: 40
         permissions:
-            contents: read
-            issues: write
+            actions: write
+        env:
+            GH_TOKEN: ${{ github.token }}
+            GH_REPO: ${{ github.repository }}
+        steps:
+            - name: Dispatch the deploy and wait for it
+              run: |
+                  # The dispatch returns the URL of the run it created, so a
+                  # deploy started by someone else at the same time is never
+                  # mistaken for this one.
+                  url=$(gh workflow run deploy.yml --ref main)
+                  run_id=${url##*/}
+                  [[ "$run_id" =~ ^[0-9]+$ ]] || { echo "no run id in: $url" >&2; exit 1; }
+                  echo "Deploy run: $url"
+                  gh run watch "$run_id" --exit-status --interval 10
