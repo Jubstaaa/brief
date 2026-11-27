@@ -1,5 +1,5 @@
 {
-    "extends": "@jubstaaa/config/tsconfig/next",
+    "extends": "@jubstaa/config/tsconfig/next",
     "compilerOptions": {
         "lib": ["ESNext", "DOM", "DOM.Iterable"],
         "target": "ESNext",
@@ -10,6 +10,8 @@
         }
     },
     "include": [
+        "prettier.config.ts",
+        "eslint.config.ts",
         "next-env.d.ts",
         "**/*.ts",
         "**/*.tsx",

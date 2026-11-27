@@ -1,4 +1,4 @@
-import base from '@jubstaaa/config/prettier'
+import base from '@jubstaa/config/prettier'
 
 const config = { ...base, plugins: ['prettier-plugin-tailwindcss'] }
 

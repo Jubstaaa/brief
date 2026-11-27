@@ -4,7 +4,7 @@
     "private": true,
     "packageManager": "bun@1.4.4",
     "devDependencies": {
-        "@jubstaaa/config": "github:Jubstaaa/configs#06eb08bb2d26d6a1152cea4ca10e696740fca5df",
+        "@jubstaa/config": "^1.6.0",
         "@tailwindcss/postcss": "^4.3.5",
         "@types/bun": "^1.4.4",
         "@types/react": "^19.3.0",
