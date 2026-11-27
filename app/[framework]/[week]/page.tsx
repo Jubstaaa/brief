@@ -1,52 +1,30 @@
 import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
+import type { Release } from '@/lib/brief'
+import type { RepoConfig } from '@/lib/repos'
+
 import JsonLd from '@/components/json-ld'
 import { readBrief, readWeekParams } from '@/lib/archive'
-import type { Release } from '@/lib/brief'
 import { OG_SIZE, ogImagePath } from '@/lib/og'
 import { findRepoBySlug } from '@/lib/repos'
-import type { RepoConfig } from '@/lib/repos'
 import { pageUrl, SITE_NAME } from '@/lib/site'
 import { formatRange } from '@/lib/window'
 
 import WeekItem from './_components/week-item'
 import WeekReleases from './_components/week-releases'
 
-function releasesFor(releases: Release[], label: string): Release[] {
-    return releases.filter(release => release.label === label)
-}
-
 export interface WeekPageProps {
     params: Promise<{ framework: string; week: string }>
 }
 
-// Only weeks listed in the index exist; anything else is a 404, in dev too.
+function releasesFor(releases: Release[], label: string): Release[] {
+    return releases.filter(release => release.label === label)
+}
+
 export const dynamicParams = false
-
-export function generateStaticParams() {
-    return readWeekParams()
-}
-
-async function load(params: WeekPageProps['params']) {
-    const { framework, week } = await params
-    const config = findRepoBySlug(framework)
-
-    if (!config) return undefined
-
-    const brief = await readBrief(week)
-
-    const items = brief.items.filter(item => item.repo === config.label)
-
-    if (!items.length) return undefined
-
-    return { brief, config, items }
-}
-
-function describe(config: RepoConfig, range: string, count: number): string {
-    return `${range} arasında ${config.locative} değişen ve bizi ilgilendiren ${count} şey.`
-}
 
 export async function generateMetadata({
     params,
@@ -76,6 +54,10 @@ export async function generateMetadata({
         },
         title: `${config.title} · ${range} · ${SITE_NAME}`,
     }
+}
+
+export function generateStaticParams() {
+    return readWeekParams()
 }
 
 export default async function WeekPage({ params }: WeekPageProps) {
@@ -124,7 +106,7 @@ export default async function WeekPage({ params }: WeekPageProps) {
 
             <div className="mt-14">
                 {items.map((item, index) => (
-                    <WeekItem key={item.pr} item={item} ordinal={index + 1} />
+                    <WeekItem item={item} key={item.pr} ordinal={index + 1} />
                 ))}
             </div>
 
@@ -134,4 +116,23 @@ export default async function WeekPage({ params }: WeekPageProps) {
             </footer>
         </>
     )
+}
+
+function describe(config: RepoConfig, range: string, count: number): string {
+    return `${range} arasında ${config.locative} değişen ve bizi ilgilendiren ${count} şey.`
+}
+
+async function load(params: WeekPageProps['params']) {
+    const { framework, week } = await params
+    const config = findRepoBySlug(framework)
+
+    if (!config) return undefined
+
+    const brief = await readBrief(week)
+
+    const items = brief.items.filter(item => item.repo === config.label)
+
+    if (!items.length) return undefined
+
+    return { brief, config, items }
 }

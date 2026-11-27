@@ -1,3 +1,5 @@
+import type { z } from 'zod'
+
 import {
     afterEach,
     beforeEach,
@@ -7,20 +9,17 @@ import {
     spyOn,
     test,
 } from 'bun:test'
-
 import { consola } from 'consola'
-import type { z } from 'zod'
+
+import type { PullDetail } from '@/pipeline/github/pulls'
 
 import { briefSchema } from '@/lib/brief'
-import type { PullDetail } from '@/pipeline/github/pulls'
 import { MAX_CODE_BLOCKS } from '@/pipeline/inference/config'
 
 import type { TriagePick } from './triage.schema'
 
 const complete = mock()
 
-// mock.module replaces the module for every importer in the run, so keep its
-// other exports.
 const client = await import('@/pipeline/inference/client')
 await mock.module('@/pipeline/inference/client', () => ({
     ...client,
@@ -28,10 +27,6 @@ await mock.module('@/pipeline/inference/client', () => ({
 }))
 
 const { draft } = await import('./draft')
-
-function pick(pr: number, repo = 'react'): TriagePick {
-    return { kind: 'feature', pr, reason: 'relevant', repo }
-}
 
 function detail(pr: number, label = 'react'): PullDetail {
     return {
@@ -43,6 +38,10 @@ function detail(pr: number, label = 'react'): PullDetail {
         title: `${label} PR ${pr}`,
         url: `https://github.com/example/${label}/pull/${pr}`,
     }
+}
+
+function pick(pr: number, repo = 'react'): TriagePick {
+    return { kind: 'feature', pr, reason: 'relevant', repo }
 }
 
 const written = {
@@ -104,7 +103,6 @@ describe('draft', () => {
     })
 
     test('keeps the item but drops a code sample the site could not render', async () => {
-        // complete() parses the model's JSON with the schema it is given.
         complete.mockImplementation(async ({ schema }: { schema: z.ZodType }) =>
             schema.parse({
                 ...written,

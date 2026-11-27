@@ -10,13 +10,6 @@ const PATCH_LIMIT = 450
 
 export const MAX_PATCHED_FILES = 2
 
-interface PullFile {
-    additions: number
-    deletions: number
-    patch: string
-    path: string
-}
-
 export interface PullDetail {
     body: string
     files: PullFile[]
@@ -25,6 +18,13 @@ export interface PullDetail {
     number: number
     title: string
     url: string
+}
+
+interface PullFile {
+    additions: number
+    deletions: number
+    patch: string
+    path: string
 }
 
 export async function fetchPullDetail(

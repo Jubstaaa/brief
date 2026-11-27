@@ -1,10 +1,11 @@
 import type { RepoConfig } from '@/lib/repos'
+
 import { filterCommits } from '@/pipeline/filter'
 
 import { octokit } from './client'
 
 export interface Commit {
-    prNumber: number | null
+    prNumber: null | number
     sha: string
     title: string
     url: string
@@ -19,12 +20,8 @@ export interface RepoCommits {
 
 const PR_SUFFIX = /\(#(\d+)\)\s*$/
 
-export function firstLine(message: string): string {
-    return message.split('\n')[0]!.trim()
-}
-
-export function extractPrNumber(title: string): number | null {
-    const match = title.match(PR_SUFFIX)
+export function extractPrNumber(title: string): null | number {
+    const match = PR_SUFFIX.exec(title)
     return match ? Number(match[1]) : null
 }
 
@@ -55,4 +52,8 @@ export async function fetchCommits(
     const { dropped, kept } = filterCommits(all, config.noise)
 
     return { dropped, kept, label: config.label, total: all.length }
+}
+
+export function firstLine(message: string): string {
+    return (message.split('\n')[0] ?? '').trim()
 }

@@ -1,7 +1,8 @@
 import { describe, expect, test } from 'bun:test'
 
-import { extractPrNumber, firstLine } from '@/pipeline/github/commits'
 import type { Commit } from '@/pipeline/github/commits'
+
+import { extractPrNumber, firstLine } from '@/pipeline/github/commits'
 
 import { filterCommits, isNoise } from './filter'
 
@@ -53,11 +54,15 @@ describe('isNoise', () => {
     ]
 
     for (const title of noise) {
-        test(`drops: ${title}`, () => expect(isNoise(title)).toBe(true))
+        test(`drops: ${title}`, () => {
+            expect(isNoise(title)).toBe(true)
+        })
     }
 
     for (const title of signal) {
-        test(`keeps: ${title}`, () => expect(isNoise(title)).toBe(false))
+        test(`keeps: ${title}`, () => {
+            expect(isNoise(title)).toBe(false)
+        })
     }
 })
 

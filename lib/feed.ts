@@ -1,14 +1,11 @@
 import { Feed } from 'feed'
 
 import type { ArchiveEntry } from './brief'
-import { findRepoBySlug } from './repos'
 import type { RepoConfig } from './repos'
+
+import { findRepoBySlug } from './repos'
 import { pageUrl, SITE_DESCRIPTION, SITE_NAME } from './site'
 import { formatRange } from './window'
-
-function itemCount(entry: ArchiveEntry, slug: string): number {
-    return entry.frameworks.find(item => item.slug === slug)?.itemCount ?? 0
-}
 
 export function buildFrameworkFeed(
     config: RepoConfig,
@@ -39,6 +36,10 @@ export function buildFrameworkFeed(
     }
 
     return feed.rss2()
+}
+
+function itemCount(entry: ArchiveEntry, slug: string): number {
+    return entry.frameworks.find(item => item.slug === slug)?.itemCount ?? 0
 }
 
 const SITE_FEED_LIMIT = 50

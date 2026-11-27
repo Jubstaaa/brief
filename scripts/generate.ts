@@ -38,7 +38,7 @@ new Command()
         await run(briefWindow, options.dryRun)
     })
     .parseAsync()
-    .catch(error => {
+    .catch((error: unknown) => {
         consola.error(error)
         process.exit(1)
     })

@@ -8,7 +8,6 @@ import { formatRange } from '@/lib/window'
 
 export const dynamic = 'force-static'
 
-// Only weeks listed in the index exist; anything else is a 404, in dev too.
 export const dynamicParams = false
 
 export function generateStaticParams() {

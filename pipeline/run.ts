@@ -1,10 +1,11 @@
 import { consola } from 'consola'
 
 import type { Brief, BriefItem, BriefUsage } from '@/lib/brief'
-import { REPOS } from '@/lib/repos'
 import type { BriefWindow } from '@/lib/window'
-import { fetchCommits } from '@/pipeline/github/commits'
 import type { RepoCommits } from '@/pipeline/github/commits'
+
+import { REPOS } from '@/lib/repos'
+import { fetchCommits } from '@/pipeline/github/commits'
 import { fetchReleases } from '@/pipeline/github/releases'
 import { usageTotals } from '@/pipeline/inference/client'
 import {
@@ -20,101 +21,6 @@ import { publishBrief } from './publish'
 import { triage } from './triage'
 
 const NO_ITEMS: BriefItem[] = []
-
-async function collectCommits(window: BriefWindow): Promise<RepoCommits[]> {
-    const repos: RepoCommits[] = []
-
-    for (const config of REPOS) {
-        const result = await fetchCommits(config, window.since, window.until)
-        consola.info(
-            `${result.label}: ${result.total} commits, ${result.kept.length} kept, ${result.dropped} dropped`
-        )
-        repos.push(result)
-    }
-
-    return repos
-}
-
-async function summarise(repos: RepoCommits[]): Promise<BriefItem[]> {
-    const kept = repos.reduce((total, repo) => total + repo.kept.length, 0)
-
-    if (kept === 0) return NO_ITEMS
-
-    consola.start('triaging')
-    const triaged = await triage(repos)
-    consola.success(`picked ${triaged.picks.length} relevant changes`)
-
-    consola.start('fetching pull request detail')
-    const details = await enrich(triaged, repos)
-    consola.success(`fetched ${details.length} pull requests`)
-
-    consola.start('writing')
-    const written = await draft(triaged, details)
-    consola.success(`wrote ${written.length} items`)
-
-    return written
-}
-
-function buildUsage(): BriefUsage {
-    const totals = usageTotals()
-
-    if (INPUT_USD_PER_MTOK === undefined || OUTPUT_USD_PER_MTOK === undefined) {
-        return totals
-    }
-
-    return {
-        ...totals,
-        costUsd:
-            (totals.inputTokens * INPUT_USD_PER_MTOK +
-                totals.outputTokens * OUTPUT_USD_PER_MTOK) /
-            1_000_000,
-    }
-}
-
-function assemble(
-    window: BriefWindow,
-    repos: RepoCommits[],
-    releases: Brief['releases'],
-    written: BriefItem[]
-): Brief {
-    return {
-        commits: repos.flatMap(repo =>
-            repo.kept.map(commit => ({
-                repo: repo.label,
-                title: commit.title,
-                url: commit.url,
-            }))
-        ),
-        counts: repos.map(repo => ({
-            kept: repo.kept.length,
-            label: repo.label,
-            total: repo.total,
-        })),
-        generatedAt: new Date().toISOString(),
-        items: written,
-        model: `${TRIAGE_MODEL} + ${DRAFT_MODEL}`,
-        quiet: written.length === 0,
-        releases,
-        since: window.since,
-        until: window.until,
-        usage: buildUsage(),
-        week: window.week,
-    }
-}
-
-function reportDryRun(repos: RepoCommits[]): void {
-    for (const repo of repos) {
-        consola.box(
-            `${repo.label} — ${repo.kept.length} kept of ${repo.total}\n\n` +
-                repo.kept
-                    .map(
-                        commit =>
-                            `${String(commit.prNumber ?? '-').padStart(6)}  ${commit.title}`
-                    )
-                    .join('\n')
-        )
-    }
-}
 
 export async function run(window: BriefWindow, dryRun: boolean): Promise<void> {
     consola.info(
@@ -148,4 +54,99 @@ export async function run(window: BriefWindow, dryRun: boolean): Promise<void> {
     consola.success(
         `published ${brief.week} to Spaces — run \`bun run build\` to render the site`
     )
+}
+
+function assemble(
+    window: BriefWindow,
+    repos: RepoCommits[],
+    releases: Brief['releases'],
+    written: BriefItem[]
+): Brief {
+    return {
+        commits: repos.flatMap(repo =>
+            repo.kept.map(commit => ({
+                repo: repo.label,
+                title: commit.title,
+                url: commit.url,
+            }))
+        ),
+        counts: repos.map(repo => ({
+            kept: repo.kept.length,
+            label: repo.label,
+            total: repo.total,
+        })),
+        generatedAt: new Date().toISOString(),
+        items: written,
+        model: `${TRIAGE_MODEL} + ${DRAFT_MODEL}`,
+        quiet: written.length === 0,
+        releases,
+        since: window.since,
+        until: window.until,
+        usage: buildUsage(),
+        week: window.week,
+    }
+}
+
+function buildUsage(): BriefUsage {
+    const totals = usageTotals()
+
+    if (INPUT_USD_PER_MTOK === undefined || OUTPUT_USD_PER_MTOK === undefined) {
+        return totals
+    }
+
+    return {
+        ...totals,
+        costUsd:
+            (totals.inputTokens * INPUT_USD_PER_MTOK +
+                totals.outputTokens * OUTPUT_USD_PER_MTOK) /
+            1_000_000,
+    }
+}
+
+async function collectCommits(window: BriefWindow): Promise<RepoCommits[]> {
+    const repos: RepoCommits[] = []
+
+    for (const config of REPOS) {
+        const result = await fetchCommits(config, window.since, window.until)
+        consola.info(
+            `${result.label}: ${result.total} commits, ${result.kept.length} kept, ${result.dropped} dropped`
+        )
+        repos.push(result)
+    }
+
+    return repos
+}
+
+function reportDryRun(repos: RepoCommits[]): void {
+    for (const repo of repos) {
+        consola.box(
+            `${repo.label} — ${repo.kept.length} kept of ${repo.total}\n\n` +
+                repo.kept
+                    .map(
+                        commit =>
+                            `${String(commit.prNumber ?? '-').padStart(6)}  ${commit.title}`
+                    )
+                    .join('\n')
+        )
+    }
+}
+
+async function summarise(repos: RepoCommits[]): Promise<BriefItem[]> {
+    const kept = repos.reduce((total, repo) => total + repo.kept.length, 0)
+
+    if (kept === 0) return NO_ITEMS
+
+    consola.start('triaging')
+    const triaged = await triage(repos)
+    consola.success(`picked ${triaged.picks.length} relevant changes`)
+
+    consola.start('fetching pull request detail')
+    const details = await enrich(triaged, repos)
+    consola.success(`fetched ${details.length} pull requests`)
+
+    consola.start('writing')
+    const written = await draft(triaged, details)
+    consola.success(`wrote ${written.length} items`)
+
+    return written
 }

@@ -10,16 +10,10 @@ export const BRIEF_KINDS = [
 
 export type BriefKind = (typeof BRIEF_KINDS)[number]
 
-// The archive lives in a public bucket and its links end up in href
-// attributes. Every stored link comes from the GitHub API, so anything else
-// means the bucket was tampered with.
 const githubUrl = z.url({ hostname: /^github\.com$/, protocol: /^https$/ })
 
-// The language is spliced into a Markdown code fence; a newline or backtick
-// would end the fence early.
 export const codeLangSchema = z.string().regex(/^[\w#+.-]{1,20}$/)
 
-// Slugs become route segments of the static export.
 const slugSchema = z.string().regex(/^[a-z0-9-]+$/)
 
 const releaseSchema = z.object({
@@ -96,8 +90,6 @@ export const archiveSchema = z.array(
 
 export type ArchiveEntry = z.infer<typeof archiveSchema>[number]
 
-// Names the bucket key in the error, so a failed build or run points at the
-// file to fix.
 export function parseStored<T extends z.ZodType>(
     schema: T,
     key: string,

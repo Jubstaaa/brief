@@ -1,10 +1,12 @@
 import type { Metadata } from 'next'
+
 import Image from 'next/image'
 import Link from 'next/link'
 
+import type { ArchiveEntry } from '@/lib/brief'
+
 import JsonLd from '@/components/json-ld'
 import { readArchive } from '@/lib/archive'
-import type { ArchiveEntry } from '@/lib/brief'
 import { REPOS } from '@/lib/repos'
 import {
     pageUrl,
@@ -22,18 +24,6 @@ export const metadata: Metadata = {
     },
     description: SITE_DESCRIPTION,
     title: `${SITE_NAME} — ${SITE_FRAMEWORKS} haftalık özeti`,
-}
-
-function latestFor(
-    entries: ArchiveEntry[],
-    slug: string
-): { entry: ArchiveEntry; itemCount: number } | undefined {
-    for (const entry of entries) {
-        const framework = entry.frameworks.find(item => item.slug === slug)
-        if (framework) return { entry, itemCount: framework.itemCount }
-    }
-
-    return undefined
 }
 
 export default async function HomePage() {
@@ -58,9 +48,9 @@ export default async function HomePage() {
             />
             <h1 className="page-title flex items-center gap-3">
                 <Image
-                    priority
                     alt=""
                     height={30}
+                    priority
                     src={SITE_LOGO_PATH}
                     width={30}
                 />
@@ -79,8 +69,8 @@ export default async function HomePage() {
 
                             return (
                                 <li
-                                    key={config.slug}
-                                    className="border-line border-b">
+                                    className="border-line border-b"
+                                    key={config.slug}>
                                     <Link
                                         className="text-ink hover:text-accent flex flex-col items-baseline gap-1 px-0.5 py-4 no-underline sm:flex-row sm:justify-between sm:gap-4"
                                         href={`/${config.slug}`}>
@@ -103,4 +93,16 @@ export default async function HomePage() {
             </footer>
         </>
     )
+}
+
+function latestFor(
+    entries: ArchiveEntry[],
+    slug: string
+): undefined | { entry: ArchiveEntry; itemCount: number } {
+    for (const entry of entries) {
+        const framework = entry.frameworks.find(item => item.slug === slug)
+        if (framework) return { entry, itemCount: framework.itemCount }
+    }
+
+    return undefined
 }

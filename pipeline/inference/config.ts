@@ -17,9 +17,6 @@ function usdPerMtok(variable: string): number | undefined {
 export const INFERENCE_BASE_URL =
     process.env.DO_INFERENCE_BASE_URL ?? 'https://inference.do-ai.run/v1'
 
-// DO model access keys are per-model allowlists since 2026-08-11. Cheap+fast
-// model triages, the stronger one drafts. llama-4-maverick and gemma-4-31B-it
-// were both retired in 2026-11; glm-5.3-flash won the rerun of the benchmark.
 export const TRIAGE_MODEL = process.env.BRIEF_TRIAGE_MODEL ?? 'glm-5.3-flash'
 
 export const TRIAGE_REASONING_EFFORT = 'low' as const
@@ -30,8 +27,6 @@ export const OUTPUT_LANGUAGE = process.env.BRIEF_LANGUAGE ?? 'Turkish'
 
 export const TRIAGE_MAX_TOKENS = 8_000
 
-// kimi-k2.6 reasons by default and will spend the entire budget thinking,
-// returning empty content. Drafting wants prose, not deliberation.
 export const DRAFT_REASONING_EFFORT = 'none' as const
 
 export const DRAFT_MAX_TOKENS = 9_000

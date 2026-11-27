@@ -1,4 +1,5 @@
 import type { RepoCommits } from '@/pipeline/github/commits'
+
 import { HIGHLIGHTS_PER_REPO } from '@/pipeline/inference/config'
 
 export const TRIAGE_SYSTEM = `You follow a frontend framework on behalf of a small team that *uses* it to ship applications. You are not a contributor to the project. The user message names which framework this week's commits come from.

@@ -4,19 +4,21 @@ import { findRepo } from '@/lib/repos'
 
 const paginate = mock()
 
-// mock.module replaces the module for every importer in the run, so keep the
-// real octokit and override only the call this test drives.
 const client = await import('./client')
 await mock.module('./client', () => ({
     ...client,
-    octokit: { ...client.octokit, paginate },
+    octokit: Object.assign(
+        Object.create(Object.getPrototypeOf(client.octokit) as object),
+        client.octokit,
+        { paginate }
+    ),
 }))
 
 const { fetchReleases } = await import('./releases')
 
 function release(
     tag: string,
-    publishedAt: string | null,
+    publishedAt: null | string,
     flags: { draft?: boolean; prerelease?: boolean } = {}
 ) {
     return {

@@ -20,23 +20,6 @@ export function usageTotals(): UsageTotals {
 
 let cached: OpenAI | undefined
 
-function client(): OpenAI {
-    if (!cached) {
-        const apiKey = process.env.DO_INFERENCE_API_KEY
-
-        if (!apiKey) throw new Error('DO_INFERENCE_API_KEY is not set')
-
-        cached = new OpenAI({
-            apiKey,
-            baseURL: INFERENCE_BASE_URL,
-            maxRetries: MAX_RETRIES,
-            timeout: REQUEST_TIMEOUT_MS,
-        })
-    }
-
-    return cached
-}
-
 export async function complete<T>(options: {
     maxTokens: number
     model: string
@@ -46,7 +29,7 @@ export async function complete<T>(options: {
     user: string
 }): Promise<T> {
     const completion = await client().chat.completions.create({
-        max_tokens: options.maxTokens,
+        max_completion_tokens: options.maxTokens,
         messages: [
             { content: options.system, role: 'system' },
             { content: options.user, role: 'user' },
@@ -62,7 +45,7 @@ export async function complete<T>(options: {
     totals.outputTokens += completion.usage?.completion_tokens ?? 0
 
     const choice = completion.choices[0]
-    const content = choice?.message?.content
+    const content = choice?.message.content
 
     if (!content) {
         throw new Error(
@@ -81,4 +64,21 @@ export async function complete<T>(options: {
     }
 
     return parsed.data
+}
+
+function client(): OpenAI {
+    if (!cached) {
+        const apiKey = process.env.DO_INFERENCE_API_KEY
+
+        if (!apiKey) throw new Error('DO_INFERENCE_API_KEY is not set')
+
+        cached = new OpenAI({
+            apiKey,
+            baseURL: INFERENCE_BASE_URL,
+            maxRetries: MAX_RETRIES,
+            timeout: REQUEST_TIMEOUT_MS,
+        })
+    }
+
+    return cached
 }

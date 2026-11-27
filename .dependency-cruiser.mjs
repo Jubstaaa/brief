@@ -1,4 +1,3 @@
-/** @type {import('dependency-cruiser').IConfiguration} */
 const config = {
     forbidden: [
         {
