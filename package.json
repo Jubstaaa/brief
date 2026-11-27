@@ -4,7 +4,7 @@
     "private": true,
     "packageManager": "bun@1.4.4",
     "devDependencies": {
-        "@jubstaaa/config": "github:Jubstaaa/configs#06eb08bb2d26d6a1152cea4ca10e696740fca5df",
+        "@jubstaa/config": "^1.6.0",
         "@tailwindcss/postcss": "^4.3.5",
         "@types/bun": "^1.4.4",
         "@types/react": "^19.3.0",
@@ -15,7 +15,6 @@
         "dependency-cruiser": "^18.8.0",
         "eslint": "^10.15.0",
         "eslint-config-next": "16.4.6",
-        "eslint-plugin-jsx-a11y": "^6.10.2",
         "jscpd": "^5.4.3",
         "knip": "^6.47.0",
         "prettier": "^3.10.1",
