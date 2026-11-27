@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 
@@ -12,36 +13,7 @@ export interface FrameworkPageProps {
     params: Promise<{ framework: string }>
 }
 
-// Only the configured frameworks exist; anything else is a 404, in dev too.
 export const dynamicParams = false
-
-export function generateStaticParams() {
-    return REPOS.map(config => ({ framework: config.slug }))
-}
-
-function describe(title: string): string {
-    return `${title} deposunda her hafta ne değişti — kullanan bir ekip için seçilmiş, Türkçe özetlenmiş commit'ler.`
-}
-
-export async function generateMetadata({
-    params,
-}: FrameworkPageProps): Promise<Metadata> {
-    const { framework } = await params
-    const config = findRepoBySlug(framework)
-
-    if (!config) return {}
-
-    return {
-        alternates: {
-            canonical: `/${config.slug}`,
-            types: {
-                'application/rss+xml': `/${config.slug}/feed.xml`,
-            },
-        },
-        description: describe(config.title),
-        title: `${config.title} haftalık özet · ${SITE_NAME}`,
-    }
-}
 
 export default async function FrameworkPage({ params }: FrameworkPageProps) {
     const { framework } = await params
@@ -84,8 +56,8 @@ export default async function FrameworkPage({ params }: FrameworkPageProps) {
                     <ul className="m-0 list-none p-0">
                         {entries.map(entry => (
                             <li
-                                key={entry.week}
-                                className="border-line border-b">
+                                className="border-line border-b"
+                                key={entry.week}>
                                 <Link
                                     className="text-ink hover:text-accent flex flex-col items-baseline gap-1 px-0.5 py-4 no-underline sm:flex-row sm:justify-between sm:gap-4"
                                     href={`/${config.slug}/${entry.week}`}>
@@ -110,4 +82,32 @@ export default async function FrameworkPage({ params }: FrameworkPageProps) {
             </footer>
         </>
     )
+}
+
+export async function generateMetadata({
+    params,
+}: FrameworkPageProps): Promise<Metadata> {
+    const { framework } = await params
+    const config = findRepoBySlug(framework)
+
+    if (!config) return {}
+
+    return {
+        alternates: {
+            canonical: `/${config.slug}`,
+            types: {
+                'application/rss+xml': `/${config.slug}/feed.xml`,
+            },
+        },
+        description: describe(config.title),
+        title: `${config.title} haftalık özet · ${SITE_NAME}`,
+    }
+}
+
+export function generateStaticParams() {
+    return REPOS.map(config => ({ framework: config.slug }))
+}
+
+function describe(title: string): string {
+    return `${title} deposunda her hafta ne değişti — kullanan bir ekip için seçilmiş, Türkçe özetlenmiş commit'ler.`
 }

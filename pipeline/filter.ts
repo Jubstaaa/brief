@@ -11,12 +11,8 @@ const NOISE_PATTERNS: RegExp[] = [
     /\btypo\b/i,
 ]
 
-export function isNoise(title: string, extra: RegExp[] = []): boolean {
-    return [...NOISE_PATTERNS, ...extra].some(pattern => pattern.test(title))
-}
-
 interface FilterableCommit {
-    prNumber: number | null
+    prNumber: null | number
     title: string
 }
 
@@ -42,4 +38,8 @@ export function filterCommits<T extends FilterableCommit>(
     }
 
     return { dropped: commits.length - kept.length, kept }
+}
+
+export function isNoise(title: string, extra: RegExp[] = []): boolean {
+    return [...NOISE_PATTERNS, ...extra].some(pattern => pattern.test(title))
 }

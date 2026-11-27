@@ -16,13 +16,13 @@ export const repoTriageSchema = z.object({
         .max(12),
 })
 
+export interface Triage {
+    picks: TriagePick[]
+}
+
 export interface TriagePick {
     kind: BriefKind
     pr: number
     reason: string
     repo: string
-}
-
-export interface Triage {
-    picks: TriagePick[]
 }

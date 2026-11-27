@@ -4,8 +4,6 @@ import type { RepoCommits } from '@/pipeline/github/commits'
 
 const fetchPullDetail = mock()
 
-// mock.module replaces the module for every importer in the run, so keep its
-// other exports.
 const pulls = await import('@/pipeline/github/pulls')
 await mock.module('@/pipeline/github/pulls', () => ({
     ...pulls,

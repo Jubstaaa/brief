@@ -50,8 +50,6 @@ beforeEach(() => {
     process.env.SPACES_KEY = 'key'
     process.env.SPACES_SECRET = 'secret'
 
-    // spyOn types a class constructor as `never`; the fake only needs the
-    // three methods publishBrief calls.
     const S3Client = spyOn(Bun, 'S3Client') as unknown as Mock<() => unknown>
     S3Client.mockImplementation(() => ({
         file: (key: string) => ({
@@ -71,7 +69,7 @@ beforeEach(() => {
 afterEach(() => {
     mock.restore()
     for (const [name, value] of Object.entries(savedEnv)) {
-        if (value === undefined) delete process.env[name]
+        if (value === undefined) Reflect.deleteProperty(process.env, name)
         else process.env[name] = value
     }
 })

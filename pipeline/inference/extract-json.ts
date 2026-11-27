@@ -1,8 +1,6 @@
-// Models are asked for JSON only but still wrap it in fences or prose; the
-// DigitalOcean endpoint does not enforce response_format for every model.
 export function extractJson(raw: string): unknown {
-    const fenced = raw.match(/```(?:json)?\s*([\s\S]*?)```/)
-    const candidate = fenced ? fenced[1]! : raw
+    const fenced = /```(?:json)?\s*([\s\S]*?)```/.exec(raw)
+    const candidate = fenced?.[1] ?? raw
     const start = candidate.indexOf('{')
     const end = candidate.lastIndexOf('}')
 

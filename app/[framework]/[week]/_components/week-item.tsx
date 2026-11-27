@@ -47,7 +47,7 @@ export default function WeekItem({ item, ordinal }: WeekItemProps) {
 
             <div className="text-muted mt-6 flex gap-2.5 text-sm">
                 <span className="text-accent shrink-0">→</span>
-                <Prose muted content={item.action} />
+                <Prose content={item.action} muted />
             </div>
         </article>
     )

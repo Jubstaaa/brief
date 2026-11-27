@@ -1,13 +1,6 @@
 import type { ArchiveEntry, ArchiveFramework, Brief } from '@/lib/brief'
-import { REPOS } from '@/lib/repos'
 
-function frameworkCounts(brief: Brief): ArchiveFramework[] {
-    return REPOS.map(config => ({
-        itemCount: brief.items.filter(item => item.repo === config.label)
-            .length,
-        slug: config.slug,
-    })).filter(framework => framework.itemCount > 0)
-}
+import { REPOS } from '@/lib/repos'
 
 export function toEntry(brief: Brief): ArchiveEntry {
     return {
@@ -18,4 +11,12 @@ export function toEntry(brief: Brief): ArchiveEntry {
         until: brief.until,
         week: brief.week,
     }
+}
+
+function frameworkCounts(brief: Brief): ArchiveFramework[] {
+    return REPOS.map(config => ({
+        itemCount: brief.items.filter(item => item.repo === config.label)
+            .length,
+        slug: config.slug,
+    })).filter(framework => framework.itemCount > 0)
 }

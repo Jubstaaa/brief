@@ -23,6 +23,14 @@ Do not restate the commit title. Do not name pull requests. Do not hedge — if 
 Return ONLY valid JSON for that one change, with no other text:
 {"headline":"...","detail":"...","action":"...","code":{"lang":"tsx","snippet":"..."}}`
 
+export function draftUser(
+    pick: { kind: string; reason: string },
+    detail: PullDetail,
+    framework: string
+): string {
+    return describePull(detail, pick.kind, pick.reason, framework)
+}
+
 function describePull(
     detail: PullDetail,
     kind: string,
@@ -49,12 +57,4 @@ function describePull(
     ]
         .filter(Boolean)
         .join('\n')
-}
-
-export function draftUser(
-    pick: { kind: string; reason: string },
-    detail: PullDetail,
-    framework: string
-): string {
-    return describePull(detail, pick.kind, pick.reason, framework)
 }

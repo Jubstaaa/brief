@@ -4,8 +4,6 @@ export const SITE_URL = (
     process.env.BRIEF_SITE_URL ?? 'https://brief.ilkerbalcilar.com'
 ).replace(/\/$/, '')
 
-// next.config sets trailingSlash, so canonicals end in '/'. Every absolute
-// URL the site prints (sitemap, feeds, JSON-LD) goes through here to match.
 export function pageUrl(...segments: string[]): string {
     return new URL(
         segments.map(segment => `${encodeURIComponent(segment)}/`).join(''),
@@ -15,9 +13,6 @@ export function pageUrl(...segments: string[]): string {
 
 export const SITE_NAME = 'brief'
 
-// Derived from REPOS so adding a framework never leaves the copy behind. In a
-// Turkish list the case suffix sits on the last item and covers the whole
-// enumeration, so the sentence ends with that repo's `locative`.
 const titles = REPOS.map(repo => repo.title)
 const listFormat = new Intl.ListFormat('tr', { type: 'conjunction' })
 

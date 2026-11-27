@@ -51,17 +51,16 @@ const brief = {
     week: '2026-11-17',
 }
 
+function respondWith(body: unknown, status = 200) {
+    return respondWithText(JSON.stringify(body), status)
+}
+
 function respondWithText(text: string, status = 200) {
-    // A Response body can be read once, so every call gets a fresh one.
     const fake = async () => new Response(text, { status })
 
     return spyOn(globalThis, 'fetch').mockImplementation(
         Object.assign(fake, { preconnect: fetch.preconnect })
     )
-}
-
-function respondWith(body: unknown, status = 200) {
-    return respondWithText(JSON.stringify(body), status)
 }
 
 afterEach(() => {

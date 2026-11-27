@@ -1,9 +1,10 @@
 import { consola } from 'consola'
 import { compact } from 'es-toolkit'
 
+import type { PullDetail } from '@/pipeline/github/pulls'
+
 import { type BriefItem, codeLangSchema } from '@/lib/brief'
 import { findRepo } from '@/lib/repos'
-import type { PullDetail } from '@/pipeline/github/pulls'
 import { complete } from '@/pipeline/inference/client'
 import {
     DRAFT_MAX_TOKENS,
@@ -16,26 +17,59 @@ import {
     draftUser,
 } from '@/pipeline/inference/prompts/draft.prompt'
 
-import { draftItemSchema } from './draft.schema'
 import type { Triage, TriagePick } from './triage.schema'
 
-// The site splices the language into a code fence, so it only takes a plain
-// token. A sample that does not fit is dropped, not the item, and the warning
-// keeps a prompt or model change that breaks every sample from going unseen.
-function renderableCode(
-    pick: TriagePick,
-    code: BriefItem['code'] | undefined
-): BriefItem['code'] {
-    if (!code) return null
+import { draftItemSchema } from './draft.schema'
 
-    if (!codeLangSchema.safeParse(code.lang).success) {
-        consola.warn(
-            `${pick.repo}#${pick.pr}: code language "${code.lang}" cannot be rendered, dropping the sample`
+export async function draft(
+    triaged: Triage,
+    details: PullDetail[]
+): Promise<BriefItem[]> {
+    const byPull = new Map(
+        details.map(detail => [`${detail.label}#${detail.number}`, detail])
+    )
+
+    const items = compact(
+        await Promise.all(
+            compact(
+                triaged.picks.map(pick => {
+                    const detail = byPull.get(`${pick.repo}#${pick.pr}`)
+
+                    if (!detail) {
+                        consola.warn(
+                            `${pick.repo}#${pick.pr} has no pull request detail, skipping`
+                        )
+                        return undefined
+                    }
+
+                    return { detail, pick }
+                })
+            ).map(({ detail, pick }) => draftOne(pick, detail))
         )
-        return null
+    )
+
+    if (!items.length && triaged.picks.length) {
+        throw new Error(
+            `drafting failed for all ${triaged.picks.length} picks and produced no items`
+        )
     }
 
-    return code
+    capCodeBlocks(items)
+
+    return items
+}
+
+function capCodeBlocks(items: BriefItem[]): void {
+    const used = new Map<string, number>()
+
+    for (const item of items) {
+        if (!item.code) continue
+
+        const count = (used.get(item.repo) ?? 0) + 1
+        used.set(item.repo, count)
+
+        if (count > MAX_CODE_BLOCKS) item.code = null
+    }
 }
 
 async function draftOne(
@@ -69,57 +103,18 @@ async function draftOne(
     }
 }
 
-function capCodeBlocks(items: BriefItem[]): void {
-    const used = new Map<string, number>()
+function renderableCode(
+    pick: TriagePick,
+    code: BriefItem['code'] | undefined
+): BriefItem['code'] {
+    if (!code) return null
 
-    for (const item of items) {
-        if (!item.code) continue
-
-        const count = (used.get(item.repo) ?? 0) + 1
-        used.set(item.repo, count)
-
-        if (count > MAX_CODE_BLOCKS) item.code = null
-    }
-}
-
-export async function draft(
-    triaged: Triage,
-    details: PullDetail[]
-): Promise<BriefItem[]> {
-    // PR numbers repeat across repos, so a detail is found by repo and number.
-    const byPull = new Map(
-        details.map(detail => [`${detail.label}#${detail.number}`, detail])
-    )
-
-    const items = compact(
-        await Promise.all(
-            compact(
-                triaged.picks.map(pick => {
-                    const detail = byPull.get(`${pick.repo}#${pick.pr}`)
-
-                    if (!detail) {
-                        consola.warn(
-                            `${pick.repo}#${pick.pr} has no pull request detail, skipping`
-                        )
-                        return undefined
-                    }
-
-                    return { detail, pick }
-                })
-            ).map(({ detail, pick }) => draftOne(pick, detail))
+    if (!codeLangSchema.safeParse(code.lang).success) {
+        consola.warn(
+            `${pick.repo}#${pick.pr}: code language "${code.lang}" cannot be rendered, dropping the sample`
         )
-    )
-
-    // Same trap as triage: every draftOne failure is swallowed, so a broken
-    // model would publish an empty brief. Picks without items means drafting
-    // broke, not that the week was quiet.
-    if (!items.length && triaged.picks.length) {
-        throw new Error(
-            `drafting failed for all ${triaged.picks.length} picks and produced no items`
-        )
+        return null
     }
 
-    capCodeBlocks(items)
-
-    return items
+    return code
 }

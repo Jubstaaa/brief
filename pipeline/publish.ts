@@ -33,14 +33,6 @@ function client(): Bun.S3Client {
 
 const PUBLIC_JSON = { acl: 'public-read', type: 'application/json' } as const
 
-function weekKey(week: string): string {
-    return `${WEEK_KEY_PREFIX}${week}.json`
-}
-
-// Nothing is written until the new week and every stored week pass the schema
-// the site builds against, so a run that fails validation leaves the bucket as
-// it was. The week is written before the index, so a failed index write leaves
-// an unlisted week that the next run picks up.
 export async function publishBrief(brief: Brief): Promise<void> {
     const spaces = client()
     const key = weekKey(brief.week)
@@ -75,4 +67,8 @@ export async function publishBrief(brief: Brief): Promise<void> {
         `${JSON.stringify(index, null, 2)}\n`,
         PUBLIC_JSON
     )
+}
+
+function weekKey(week: string): string {
+    return `${WEEK_KEY_PREFIX}${week}.json`
 }
