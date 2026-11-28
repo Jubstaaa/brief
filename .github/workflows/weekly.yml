@@ -18,21 +18,14 @@ concurrency:
     cancel-in-progress: false
 
 jobs:
-    # The full gate runs before the model calls, which are the only part of the
-    # run that costs money.
     ci:
-        # A dispatch from another branch would run that branch's script with the
-        # inference and bucket keys.
         if: github.ref == 'refs/heads/main'
         uses: ./.github/workflows/ci.yml
 
     generate:
         needs: ci
-        # The inference and bucket keys live in this environment, which only
-        # accepts main.
         environment: weekly
         runs-on: ubuntu-latest
-        # A normal run takes about two minutes; the default is six hours.
         timeout-minutes: 30
         permissions:
             contents: read
@@ -51,8 +44,6 @@ jobs:
                   DO_INFERENCE_API_KEY: ${{ secrets.DO_INFERENCE_API_KEY }}
                   SPACES_KEY: ${{ secrets.SPACES_KEY }}
                   SPACES_SECRET: ${{ secrets.SPACES_SECRET }}
-                  # Inputs reach the shell as environment variables, never as
-                  # interpolated script text.
                   SINCE: ${{ inputs.since }}
                   UNTIL: ${{ inputs.until }}
                   WEEK: ${{ inputs.week }}
@@ -63,9 +54,6 @@ jobs:
                   [ -n "$WEEK" ] && args+=("--week=$WEEK")
                   bun run scripts/generate.ts "${args[@]}"
 
-    # The deploy secrets live in the production environment, and a called
-    # workflow does not receive them, so the deploy runs as its own workflow
-    # run and this job waits for it. Its alert job opens the failure issue.
     publish:
         needs: generate
         runs-on: ubuntu-latest
@@ -78,15 +66,10 @@ jobs:
         steps:
             - name: Dispatch the deploy and wait for it
               run: |
-                  # The dispatch returns the URL of the run it created, so a
-                  # deploy started by someone else at the same time is never
-                  # mistaken for this one.
                   url=$(gh workflow run deploy.yml --ref main)
                   run_id=${url##*/}
                   [[ "$run_id" =~ ^[0-9]+$ ]] || { echo "no run id in: $url" >&2; exit 1; }
                   echo "Deploy run: $url"
-                  # gh run watch asks for the jobs of a run that is only seconds
-                  # old and gets a 404, so poll the run itself.
                   for _ in $(seq 1 120); do
                       state=$(gh run view "$run_id" --json status,conclusion \
                           --jq '"\(.status) \(.conclusion)"' || true)
