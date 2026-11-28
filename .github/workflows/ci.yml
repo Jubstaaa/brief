@@ -39,15 +39,10 @@ jobs:
                   scan-ref: .
                   scanners: vuln,secret,misconfig
                   severity: HIGH,CRITICAL
-                  # A finding with no fixed version would block every PR with
-                  # nothing to act on; bun audit reports those advisories too.
                   ignore-unfixed: true
                   exit-code: '1'
                   skip-dirs: node_modules,.next,out
                   version: v0.76.2
-                  # Outside the checkout, so the database never lands in the
-                  # scanned tree; and no per-PR cache, which no other PR could
-                  # restore.
                   cache-dir: ${{ runner.temp }}/trivy
                   cache: 'false'
             - name: actionlint

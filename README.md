@@ -99,8 +99,7 @@ Spaces and ships `out/` to the box where Caddy serves it through
 answering). It runs no gate of its own: `main` only accepts commits whose required `check`
 passed on a branch that was up to date with it. It runs on every push to `main`, so a code
 change ships without regenerating a brief; on a manual dispatch, which redeploys `main` and
-nothing else; after a Dependabot auto-merge, which dispatches it because a bot merge
-starts no push workflow; and from `weekly.yml` once it has published the week. The deploy job runs in the `production` environment, which only
+nothing else; and from `weekly.yml` once it has published the week. The deploy job runs in the `production` environment, which only
 accepts `main`. A failed deploy on `main` opens (or comments on) a "Production deploy failed"
 issue. Pull requests get the checks and stop there. No container, no app server — just files.
 
@@ -178,3 +177,7 @@ cheap to keep alive — but not free. If it saves you a scroll through four comm
 week, you can support it on
 [GitHub Sponsors](https://github.com/sponsors/Jubstaaa) or
 [Buy Me a Coffee](https://buymeacoffee.com/jubstaa).
+
+## License
+
+MIT
