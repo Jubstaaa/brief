@@ -9,7 +9,7 @@
     "private": true,
     "packageManager": "bun@1.4.4",
     "devDependencies": {
-        "@jubstaa/config": "^1.6.0",
+        "@jubstaa/config": "^2.1.0",
         "@tailwindcss/postcss": "^4.3.5",
         "@types/bun": "^1.4.4",
         "@types/react": "^19.3.0",
